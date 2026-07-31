@@ -24,4 +24,7 @@
 | RNF-08 | O sistema deve salvar em banco a geolocalização de todos os endereços (lat, long). Utilizar alguma API externa | Baixa      |
 | RNF-09 | Código em arquitetura hexagonal                                                                                | Alta |
 
+## DER PostgreSQL
+<img width="680" height="442" alt="image" src="https://github.com/user-attachments/assets/53baba0a-1a4b-450e-af5c-28b7b9b82325" />
+
 
