@@ -1,8 +1,8 @@
 package food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.get;
 
-import food.delivery.user_ms.core.domain.entities.Adress;
+import food.delivery.user_ms.core.domain.entities.Address;
 import food.delivery.user_ms.core.domain.entities.User;
-import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.AdressResponseDto;
+import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.AddressResponseDto;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public final class UserResponseMapper {
         response.setId(user.getId());
         response.setName(user.getName());
         response.setEmail(user.getEmail());
-        response.setAdress(toAdressResponse(user.getAdress()));
+        response.setAddress(toAddressResponse(user.getAddress()));
         return response;
     }
 
@@ -24,20 +24,20 @@ public final class UserResponseMapper {
         return users.stream().map(UserResponseMapper::toResponse).toList();
     }
 
-    private static AdressResponseDto toAdressResponse(Adress adress) {
-        if (adress == null) {
+    private static AddressResponseDto toAddressResponse(Address address) {
+        if (address == null) {
             return null;
         }
-        AdressResponseDto dto = new AdressResponseDto();
-        dto.setId(adress.getId());
-        dto.setCep(adress.getCep());
-        dto.setLogradouro(adress.getLogradouro());
-        dto.setNumero(adress.getNumero());
-        dto.setComplemento(adress.getComplemento());
-        dto.setBairro(adress.getBairro());
-        dto.setCidade(adress.getCidade());
-        dto.setUf(adress.getUf());
-        dto.setReferencia(adress.getReferencia());
+        AddressResponseDto dto = new AddressResponseDto();
+        dto.setId(address.getId());
+        dto.setCep(address.getCep());
+        dto.setLogradouro(address.getLogradouro());
+        dto.setNumero(address.getNumero());
+        dto.setComplemento(address.getComplemento());
+        dto.setBairro(address.getBairro());
+        dto.setCidade(address.getCidade());
+        dto.setUf(address.getUf());
+        dto.setReferencia(address.getReferencia());
         return dto;
     }
 }

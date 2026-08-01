@@ -1,26 +1,30 @@
 package food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create;
 
-import java.util.UUID;
+import jakarta.validation.constraints.NotBlank;
 
-public class AdressResponseDto {
+public class AddressRequestDto {
 
-    private UUID id;
+    @NotBlank
     private String cep;
+
+    @NotBlank
     private String logradouro;
+
+    @NotBlank
     private String numero;
+
     private String complemento;
+
+    @NotBlank
     private String bairro;
+
+    @NotBlank
     private String cidade;
+
+    @NotBlank
     private String uf;
+
     private String referencia;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
 
     public String getCep() {
         return cep;

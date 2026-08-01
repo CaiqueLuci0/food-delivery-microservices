@@ -1,6 +1,6 @@
 package food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.get;
 
-import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.AdressResponseDto;
+import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.AddressResponseDto;
 
 import java.util.UUID;
 
@@ -9,7 +9,7 @@ public class UserResponseDto {
     private UUID id;
     private String name;
     private String email;
-    private AdressResponseDto adress;
+    private AddressResponseDto address;
 
     public UUID getId() {
         return id;
@@ -35,11 +35,11 @@ public class UserResponseDto {
         this.email = email;
     }
 
-    public AdressResponseDto getAdress() {
-        return adress;
+    public AddressResponseDto getAddress() {
+        return address;
     }
 
-    public void setAdress(AdressResponseDto adress) {
-        this.adress = adress;
+    public void setAddress(AddressResponseDto address) {
+        this.address = address;
     }
 }

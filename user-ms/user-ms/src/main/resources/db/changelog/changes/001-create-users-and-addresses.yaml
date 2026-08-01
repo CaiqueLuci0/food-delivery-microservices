@@ -30,16 +30,16 @@ databaseChangeLog:
                   type: varchar(255)
 
   - changeSet:
-      id: 001-create-adresses
+      id: 001-create-addresses
       author: user-ms
       preConditions:
         - onFail: MARK_RAN
         - not:
             - tableExists:
-                tableName: adresses
+                tableName: addresses
       changes:
         - createTable:
-            tableName: adresses
+            tableName: addresses
             columns:
               - column:
                   name: id
@@ -77,5 +77,5 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     unique: true
-                    foreignKeyName: fk_adresses_user
+                    foreignKeyName: fk_addresses_user
                     references: users(id)

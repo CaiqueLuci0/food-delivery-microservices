@@ -1,7 +1,7 @@
 package food.delivery.user_ms.infra.adapters.inbound.web.service;
 
 import food.delivery.user_ms.core.application.ports.in.UserCrudUseCaseInputPort;
-import food.delivery.user_ms.core.domain.entities.Adress;
+import food.delivery.user_ms.core.domain.entities.Address;
 import food.delivery.user_ms.core.domain.entities.User;
 import food.delivery.user_ms.core.domain.enums.ConstMessagesEnum;
 import food.delivery.user_ms.core.domain.exceptions.UnauthorizedException;
@@ -29,8 +29,8 @@ public class UserService {
 
     public UserResponseDto create(UserCreateRequestDto request) {
         User user = UserCreateMapper.toUser(request);
-        Adress adress = UserCreateMapper.toAdress(request.getAdress());
-        User created = userCrudUseCase.create(user, adress);
+        Address address = UserCreateMapper.toAddress(request.getAddress());
+        User created = userCrudUseCase.create(user, address);
         return UserResponseMapper.toResponse(created);
     }
 

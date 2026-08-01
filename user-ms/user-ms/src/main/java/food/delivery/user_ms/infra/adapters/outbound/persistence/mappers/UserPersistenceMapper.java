@@ -1,6 +1,6 @@
 package food.delivery.user_ms.infra.adapters.outbound.persistence.mappers;
 
-import food.delivery.user_ms.core.domain.entities.Adress;
+import food.delivery.user_ms.core.domain.entities.Address;
 import food.delivery.user_ms.core.domain.entities.User;
 import food.delivery.user_ms.infra.adapters.outbound.persistence.jpaentities.JpaUser;
 
@@ -19,7 +19,7 @@ public final class UserPersistenceMapper {
         jpaUser.setName(user.getName());
         jpaUser.setEmail(user.getEmail());
         jpaUser.setPassword(user.getPassword());
-        jpaUser.setAdress(AdressPersistenceMapper.toJpa(user.getAdress()));
+        jpaUser.setAddress(AddressPersistenceMapper.toJpa(user.getAddress()));
 
         return jpaUser;
     }
@@ -35,10 +35,10 @@ public final class UserPersistenceMapper {
         user.setEmail(jpaUser.getEmail());
         user.setPassword(jpaUser.getPassword());
 
-        Adress adress = AdressPersistenceMapper.toDomain(jpaUser.getAdress());
-        if (adress != null) {
-            adress.setUser(user);
-            user.setAdress(adress);
+        Address address = AddressPersistenceMapper.toDomain(jpaUser.getAddress());
+        if (address != null) {
+            address.setUser(user);
+            user.setAddress(address);
         }
 
         return user;

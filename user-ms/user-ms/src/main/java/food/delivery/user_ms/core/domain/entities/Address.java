@@ -2,7 +2,7 @@ package food.delivery.user_ms.core.domain.entities;
 
 import java.util.UUID;
 
-public class Adress {
+public class Address {
 
     private UUID id;
     private String cep;
@@ -15,7 +15,7 @@ public class Adress {
     private String referencia;
     private User user;
 
-    public Adress(UUID id, String cep, String logradouro, String numero, String complemento, String bairro, String cidade, String uf, String referencia, User user) {
+    public Address(UUID id, String cep, String logradouro, String numero, String complemento, String bairro, String cidade, String uf, String referencia, User user) {
         this.id = id;
         this.cep = cep;
         this.logradouro = logradouro;
@@ -36,7 +36,7 @@ public class Adress {
         this.user = user;
     }
 
-    public Adress() {
+    public Address() {
     }
 
     public UUID getId() {

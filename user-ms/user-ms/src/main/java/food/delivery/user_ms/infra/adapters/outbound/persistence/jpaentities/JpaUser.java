@@ -16,17 +16,17 @@ public class JpaUser {
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private JpaAdress adress;
+    private JpaAddress address;
 
     public JpaUser() {
     }
 
-    public JpaUser(UUID id, String name, String email, String password, JpaAdress adress) {
+    public JpaUser(UUID id, String name, String email, String password, JpaAddress address) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.adress = adress;
+        this.address = address;
     }
 
     public UUID getId() {
@@ -61,14 +61,14 @@ public class JpaUser {
         this.password = password;
     }
 
-    public JpaAdress getAdress() {
-        return adress;
+    public JpaAddress getAddress() {
+        return address;
     }
 
-    public void setAdress(JpaAdress adress) {
-        this.adress = adress;
-        if (adress != null) {
-            adress.setUser(this);
+    public void setAddress(JpaAddress address) {
+        this.address = address;
+        if (address != null) {
+            address.setUser(this);
         }
     }
 }

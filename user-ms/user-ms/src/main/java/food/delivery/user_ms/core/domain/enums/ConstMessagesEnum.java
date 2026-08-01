@@ -8,7 +8,8 @@ public enum ConstMessagesEnum {
     DATA_INTEGRITY_VIOLATION("Violação de integridade dos dados"),
     INTERNAL_ERROR("Erro interno do servidor"),
     INVALID_CREDENTIALS("Credenciais inválidas"),
-    ACCESS_DENIED("Acesso negado");
+    ACCESS_DENIED("Acesso negado"),
+    INVALID_CEP("CEP inválido ou não encontrado");
 
     private final String messageBase;
 

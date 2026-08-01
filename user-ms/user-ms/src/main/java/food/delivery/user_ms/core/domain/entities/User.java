@@ -7,22 +7,22 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private Adress adress;
+    private Address address;
 
-    public User(UUID id, String name, String email, String password, Adress adress) {
+    public User(UUID id, String name, String email, String password, Address address) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.adress = adress;
+        this.address = address;
     }
 
-    public Adress getAdress() {
-        return adress;
+    public Address getAddress() {
+        return address;
     }
 
-    public void setAdress(Adress adress) {
-        this.adress = adress;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public User() {

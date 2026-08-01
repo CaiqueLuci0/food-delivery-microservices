@@ -92,7 +92,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\",\n  \"adress\": {\n    \"cep\": \"01310-100\",\n    \"logradouro\": \"Avenida Paulista\",\n    \"numero\": \"1000\",\n    \"complemento\": \"Apto 101\",\n    \"bairro\": \"Bela Vista\",\n    \"cidade\": \"São Paulo\",\n    \"uf\": \"SP\",\n    \"referencia\": \"Próximo ao MASP\"\n  }\n}"
+              "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\",\n  \"address\": {\n    \"cep\": \"01310-100\",\n    \"logradouro\": \"Avenida Paulista\",\n    \"numero\": \"1000\",\n    \"complemento\": \"Apto 101\",\n    \"bairro\": \"Bela Vista\",\n    \"cidade\": \"São Paulo\",\n    \"uf\": \"SP\",\n    \"referencia\": \"Próximo ao MASP\"\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/users",

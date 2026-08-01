@@ -19,7 +19,7 @@ public class UserCreateRequestDto {
 
     @NotNull
     @Valid
-    private AdressRequestDto adress;
+    private AddressRequestDto address;
 
     public String getName() {
         return name;
@@ -45,11 +45,11 @@ public class UserCreateRequestDto {
         this.password = password;
     }
 
-    public AdressRequestDto getAdress() {
-        return adress;
+    public AddressRequestDto getAddress() {
+        return address;
     }
 
-    public void setAdress(AdressRequestDto adress) {
-        this.adress = adress;
+    public void setAddress(AddressRequestDto address) {
+        this.address = address;
     }
 }
