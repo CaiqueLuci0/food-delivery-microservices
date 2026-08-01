@@ -1,39 +1,30 @@
-package food.delivery.user_ms.infra.adapters.outbound.persistence.jpaentities;
+package food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
-import java.util.UUID;
+public class AdressRequestDto {
 
-@Entity
-@Table(name = "adresses")
-public class JpaAdress {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @NotBlank
     private String cep;
+
+    @NotBlank
     private String logradouro;
+
+    @NotBlank
     private String numero;
+
     private String complemento;
+
+    @NotBlank
     private String bairro;
+
+    @NotBlank
     private String cidade;
+
+    @NotBlank
     private String uf;
+
     private String referencia;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)
-    private JpaUser user;
-
-    public JpaAdress() {
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
 
     public String getCep() {
         return cep;
@@ -97,13 +88,5 @@ public class JpaAdress {
 
     public void setReferencia(String referencia) {
         this.referencia = referencia;
-    }
-
-    public JpaUser getUser() {
-        return user;
-    }
-
-    public void setUser(JpaUser user) {
-        this.user = user;
     }
 }

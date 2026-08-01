@@ -1,0 +1,81 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-users
+      author: user-ms
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: users
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+
+  - changeSet:
+      id: 001-create-adresses
+      author: user-ms
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: adresses
+      changes:
+        - createTable:
+            tableName: adresses
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cep
+                  type: varchar(255)
+              - column:
+                  name: logradouro
+                  type: varchar(255)
+              - column:
+                  name: numero
+                  type: varchar(255)
+              - column:
+                  name: complemento
+                  type: varchar(255)
+              - column:
+                  name: bairro
+                  type: varchar(255)
+              - column:
+                  name: cidade
+                  type: varchar(255)
+              - column:
+                  name: uf
+                  type: varchar(255)
+              - column:
+                  name: referencia
+                  type: varchar(255)
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: fk_adresses_user
+                    references: users(id)
