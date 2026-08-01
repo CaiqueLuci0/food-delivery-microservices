@@ -2,6 +2,8 @@ package food.delivery.user_ms.core.application.usecases;
 
 import food.delivery.user_ms.core.application.ports.in.UserCrudUseCaseInputPort;
 import food.delivery.user_ms.core.application.ports.out.PasswordEncoderOutputPort;
+import food.delivery.user_ms.core.application.ports.out.UserCreatedEventOutputPort;
+import food.delivery.user_ms.core.application.ports.out.UserDeletedEventOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserRepositoryOutputPort;
 import food.delivery.user_ms.core.domain.entities.Adress;
 import food.delivery.user_ms.core.domain.entities.User;
@@ -17,13 +19,19 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
 
     private final UserRepositoryOutputPort userRepositoryOutputPort;
     private final PasswordEncoderOutputPort passwordEncoderOutputPort;
+    private final UserCreatedEventOutputPort userCreatedEventOutputPort;
+    private final UserDeletedEventOutputPort userDeletedEventOutputPort;
 
     public UserCrudUseCase(
             UserRepositoryOutputPort userRepositoryOutputPort,
-            PasswordEncoderOutputPort passwordEncoderOutputPort
+            PasswordEncoderOutputPort passwordEncoderOutputPort,
+            UserCreatedEventOutputPort userCreatedEventOutputPort,
+            UserDeletedEventOutputPort userDeletedEventOutputPort
     ) {
         this.userRepositoryOutputPort = userRepositoryOutputPort;
         this.passwordEncoderOutputPort = passwordEncoderOutputPort;
+        this.userCreatedEventOutputPort = userCreatedEventOutputPort;
+        this.userDeletedEventOutputPort = userDeletedEventOutputPort;
     }
 
     @Override
@@ -48,7 +56,9 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
         user.setPassword(passwordEncoderOutputPort.encode(user.getPassword()));
         user.setAdress(adress);
         adress.setUser(user);
-        return this.userRepositoryOutputPort.save(user);
+        User saved = this.userRepositoryOutputPort.save(user);
+        userCreatedEventOutputPort.publish(saved.getId());
+        return saved;
     }
 
     @Override
@@ -63,7 +73,9 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
     public void delete(UUID authenticatedUserId, UUID userid) {
         User existingUser = this.findById(userid);
         assertSameUser(authenticatedUserId, existingUser);
+        UUID deletedUserId = existingUser.getId();
         this.userRepositoryOutputPort.delete(existingUser);
+        userDeletedEventOutputPort.publish(deletedUserId);
     }
 
     private void assertSameUser(UUID authenticatedUserId, User existingUser) {

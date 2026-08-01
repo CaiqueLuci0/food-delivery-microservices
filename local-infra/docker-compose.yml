@@ -8,13 +8,51 @@ services:
       POSTGRES_DB: user_ms
       POSTGRES_USER: usr
       POSTGRES_PASSWORD: pwd
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U usr -d user_ms"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-volumes:
-  postgres_data:
+  rabbitmq:
+    build: ./rabbitmq
+    image: local-infra-rabbitmq:local
+    container_name: user-ms-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: usr
+      RABBITMQ_DEFAULT_PASS: pwd
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "rabbitmq-diagnostics -q ping && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-dlq && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-dlq && rabbitmqctl list_exchanges name | grep -q user.created && rabbitmqctl list_exchanges name | grep -q user.deleted"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 50s
+
+  user-ms:
+    build:
+      context: ../user-ms/user-ms
+      dockerfile: Dockerfile
+    image: local-infra-user-ms:local
+    container_name: user-ms-app
+    ports:
+      - "8001:8001"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_ms
+      SPRING_DATASOURCE_USERNAME: usr
+      SPRING_DATASOURCE_PASSWORD: pwd
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: usr
+      SPRING_RABBITMQ_PASSWORD: pwd
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
