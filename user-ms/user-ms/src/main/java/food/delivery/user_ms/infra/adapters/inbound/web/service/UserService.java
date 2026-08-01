@@ -5,7 +5,6 @@ import food.delivery.user_ms.core.domain.entities.Adress;
 import food.delivery.user_ms.core.domain.entities.User;
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.UserCreateMapper;
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.UserCreateRequestDto;
-import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.UserCreateResponseDto;
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.get.UserResponseDto;
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.get.UserResponseMapper;
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.update.UserUpdateMapper;
@@ -24,11 +23,11 @@ public class UserService {
         this.userCrudUseCase = userCrudUseCase;
     }
 
-    public UserCreateResponseDto create(UserCreateRequestDto request) {
+    public UserResponseDto create(UserCreateRequestDto request) {
         User user = UserCreateMapper.toUser(request);
         Adress adress = UserCreateMapper.toAdress(request.getAdress());
         User created = userCrudUseCase.create(user, adress);
-        return UserCreateMapper.toResponse(created);
+        return UserResponseMapper.toResponse(created);
     }
 
     public UserResponseDto findById(UUID id) {

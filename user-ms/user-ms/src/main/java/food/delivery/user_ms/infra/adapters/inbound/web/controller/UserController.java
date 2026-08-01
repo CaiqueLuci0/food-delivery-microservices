@@ -1,7 +1,6 @@
 package food.delivery.user_ms.infra.adapters.inbound.web.controller;
 
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.UserCreateRequestDto;
-import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create.UserCreateResponseDto;
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.get.UserResponseDto;
 import food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.update.UserUpdateRequestDto;
 import food.delivery.user_ms.infra.adapters.inbound.web.service.UserService;
@@ -24,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserCreateResponseDto> create(@Valid @RequestBody UserCreateRequestDto request) {
+    public ResponseEntity<UserResponseDto> create(@Valid @RequestBody UserCreateRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
     }
 

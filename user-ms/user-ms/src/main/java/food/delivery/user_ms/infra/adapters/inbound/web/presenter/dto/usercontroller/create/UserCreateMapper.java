@@ -31,30 +31,4 @@ public final class UserCreateMapper {
         adress.setReferencia(dto.getReferencia());
         return adress;
     }
-
-    public static UserCreateResponseDto toResponse(User user) {
-        UserCreateResponseDto response = new UserCreateResponseDto();
-        response.setId(user.getId());
-        response.setName(user.getName());
-        response.setEmail(user.getEmail());
-        response.setAdress(toAdressResponse(user.getAdress()));
-        return response;
-    }
-
-    private static AdressResponseDto toAdressResponse(Adress adress) {
-        if (adress == null) {
-            return null;
-        }
-        AdressResponseDto dto = new AdressResponseDto();
-        dto.setId(adress.getId());
-        dto.setCep(adress.getCep());
-        dto.setLogradouro(adress.getLogradouro());
-        dto.setNumero(adress.getNumero());
-        dto.setComplemento(adress.getComplemento());
-        dto.setBairro(adress.getBairro());
-        dto.setCidade(adress.getCidade());
-        dto.setUf(adress.getUf());
-        dto.setReferencia(adress.getReferencia());
-        return dto;
-    }
 }

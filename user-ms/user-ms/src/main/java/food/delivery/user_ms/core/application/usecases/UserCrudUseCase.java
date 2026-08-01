@@ -1,6 +1,7 @@
 package food.delivery.user_ms.core.application.usecases;
 
 import food.delivery.user_ms.core.application.ports.in.UserCrudUseCaseInputPort;
+import food.delivery.user_ms.core.application.ports.out.PasswordEncoderOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserRepositoryOutputPort;
 import food.delivery.user_ms.core.domain.entities.Adress;
 import food.delivery.user_ms.core.domain.entities.User;
@@ -14,9 +15,14 @@ import java.util.UUID;
 public class UserCrudUseCase implements UserCrudUseCaseInputPort {
 
     private final UserRepositoryOutputPort userRepositoryOutputPort;
+    private final PasswordEncoderOutputPort passwordEncoderOutputPort;
 
-    public UserCrudUseCase(UserRepositoryOutputPort userRepositoryOutputPort) {
+    public UserCrudUseCase(
+            UserRepositoryOutputPort userRepositoryOutputPort,
+            PasswordEncoderOutputPort passwordEncoderOutputPort
+    ) {
         this.userRepositoryOutputPort = userRepositoryOutputPort;
+        this.passwordEncoderOutputPort = passwordEncoderOutputPort;
     }
 
     @Override
@@ -38,6 +44,7 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
         if (this.userRepositoryOutputPort.existsByEmail(user.getEmail())) {
             throw new ConflictException(ConstMessagesEnum.EMAIL_ALREADY_EXISTS.getMessage());
         }
+        user.setPassword(passwordEncoderOutputPort.encode(user.getPassword()));
         user.setAdress(adress);
         adress.setUser(user);
         return this.userRepositoryOutputPort.save(user);

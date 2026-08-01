@@ -1,7 +1,9 @@
 package food.delivery.user_ms.infra.config;
 
 import food.delivery.user_ms.core.application.ports.in.UserCrudUseCaseInputPort;
+import food.delivery.user_ms.core.application.ports.out.PasswordEncoderOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserRepositoryOutputPort;
+import food.delivery.user_ms.core.application.usecases.UserCrudUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,9 +11,10 @@ import org.springframework.context.annotation.Configuration;
 public class UserCrudUseCaseConfig {
 
     @Bean
-    UserCrudUseCaseInputPort UserCrudUseCase(
-            UserRepositoryOutputPort repository
+    UserCrudUseCaseInputPort userCrudUseCase(
+            UserRepositoryOutputPort repository,
+            PasswordEncoderOutputPort passwordEncoderOutputPort
     ) {
-        return new food.delivery.user_ms.core.application.usecases.UserCrudUseCase(repository);
+        return new UserCrudUseCase(repository, passwordEncoderOutputPort);
     }
 }
