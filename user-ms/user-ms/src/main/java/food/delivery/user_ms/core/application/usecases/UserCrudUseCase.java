@@ -7,6 +7,7 @@ import food.delivery.user_ms.core.domain.entities.Adress;
 import food.delivery.user_ms.core.domain.entities.User;
 import food.delivery.user_ms.core.domain.enums.ConstMessagesEnum;
 import food.delivery.user_ms.core.domain.exceptions.ConflictException;
+import food.delivery.user_ms.core.domain.exceptions.ForbiddenException;
 import food.delivery.user_ms.core.domain.exceptions.NotFoundException;
 
 import java.util.List;
@@ -51,15 +52,23 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
     }
 
     @Override
-    public User update(UUID userid, User user) {
+    public User update(UUID authenticatedUserId, UUID userid, User user) {
         User existingUser = this.findById(userid);
+        assertSameUser(authenticatedUserId, existingUser);
         existingUser.setName(user.getName());
         return this.userRepositoryOutputPort.save(existingUser);
     }
 
     @Override
-    public void delete(UUID userid) {
+    public void delete(UUID authenticatedUserId, UUID userid) {
         User existingUser = this.findById(userid);
+        assertSameUser(authenticatedUserId, existingUser);
         this.userRepositoryOutputPort.delete(existingUser);
+    }
+
+    private void assertSameUser(UUID authenticatedUserId, User existingUser) {
+        if (!authenticatedUserId.equals(existingUser.getId())) {
+            throw new ForbiddenException(ConstMessagesEnum.ACCESS_DENIED.getMessage());
+        }
     }
 }
