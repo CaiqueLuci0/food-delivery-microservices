@@ -7,7 +7,6 @@ import food.delivery.order_ms.core.application.ports.out.OrderRepositoryOutputPo
 import food.delivery.order_ms.core.application.ports.out.UserReferenceRepositoryOutputPort;
 import food.delivery.order_ms.core.domain.entities.CatalogResolution;
 import food.delivery.order_ms.core.domain.entities.Order;
-import food.delivery.order_ms.core.domain.entities.ProductSnapshot;
 import food.delivery.order_ms.core.domain.enums.ConstMessagesEnum;
 import food.delivery.order_ms.core.domain.enums.OrderStatus;
 import food.delivery.order_ms.core.domain.enums.PaymentStatus;
@@ -15,10 +14,8 @@ import food.delivery.order_ms.core.domain.exceptions.ConflictException;
 import food.delivery.order_ms.core.domain.exceptions.ForbiddenException;
 import food.delivery.order_ms.core.domain.exceptions.NotFoundException;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -65,10 +62,8 @@ public class OrderUseCase implements OrderUseCaseInputPort {
         requireUserReference(clientId);
         CatalogResolution resolution = resolveItems(items, bearerToken);
 
-        Order order = new Order();
-        order.setStatus(OrderStatus.EM_CADASTRAMENTO);
-        order.setClientId(clientId);
-        applyResolution(order, resolution);
+        Order order = Order.create(clientId);
+        order.applyCatalogResolution(resolution);
 
         return orderRepositoryOutputPort.save(order);
     }
@@ -82,7 +77,7 @@ public class OrderUseCase implements OrderUseCaseInputPort {
         }
 
         CatalogResolution resolution = resolveItems(items, bearerToken);
-        applyResolution(order, resolution);
+        order.applyCatalogResolution(resolution);
 
         return orderRepositoryOutputPort.saveReplacingSnapshots(order);
     }
@@ -127,8 +122,8 @@ public class OrderUseCase implements OrderUseCaseInputPort {
     @Override
     public Order cancel(UUID userId, UUID orderId) {
         Order order = requireOrder(orderId);
-        boolean isClient = Objects.equals(order.getClientId(), userId);
-        boolean isOwner = Objects.equals(order.getRestaurantOwnerId(), userId);
+        boolean isClient = order.belongsTo(userId);
+        boolean isOwner = order.isOwnedBy(userId);
 
         if (isClient && CLIENT_CANCELABLE.contains(order.getStatus())) {
             order.setStatus(OrderStatus.CANCELADO);
@@ -147,9 +142,7 @@ public class OrderUseCase implements OrderUseCaseInputPort {
     @Override
     public Order findById(UUID userId, UUID id) {
         Order order = requireOrder(id);
-        boolean isClient = Objects.equals(order.getClientId(), userId);
-        boolean isOwner = Objects.equals(order.getRestaurantOwnerId(), userId);
-        if (!isClient && !isOwner) {
+        if (!order.belongsTo(userId) && !order.isOwnedBy(userId)) {
             throw new ForbiddenException(ConstMessagesEnum.ACCESS_DENIED.getMessage());
         }
         return order;
@@ -161,16 +154,6 @@ public class OrderUseCase implements OrderUseCaseInputPort {
             return orderRepositoryOutputPort.findByClientId(userId);
         }
         return orderRepositoryOutputPort.findByRestaurantIdAndOwnerId(restaurantId, userId);
-    }
-
-    private void applyResolution(Order order, CatalogResolution resolution) {
-        order.setRestaurantId(resolution.getRestaurantId());
-        order.setRestaurantOwnerId(resolution.getRestaurantOwnerId());
-        List<ProductSnapshot> snapshots = new ArrayList<>(resolution.getProductSnapshots());
-        for (ProductSnapshot snapshot : snapshots) {
-            snapshot.setOrder(order);
-        }
-        order.setProductSnapshots(snapshots);
     }
 
     private void requireUserReference(UUID clientId) {
@@ -185,13 +168,13 @@ public class OrderUseCase implements OrderUseCaseInputPort {
     }
 
     private void requireClient(Order order, UUID clientId) {
-        if (!Objects.equals(order.getClientId(), clientId)) {
+        if (!order.belongsTo(clientId)) {
             throw new ForbiddenException(ConstMessagesEnum.ACCESS_DENIED.getMessage());
         }
     }
 
     private void requireOwner(Order order, UUID ownerId) {
-        if (!Objects.equals(order.getRestaurantOwnerId(), ownerId)) {
+        if (!order.isOwnedBy(ownerId)) {
             throw new ForbiddenException(ConstMessagesEnum.ACCESS_DENIED.getMessage());
         }
     }

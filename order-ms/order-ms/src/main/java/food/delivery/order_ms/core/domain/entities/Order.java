@@ -5,6 +5,7 @@ import food.delivery.order_ms.core.domain.enums.PaymentStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Order {
@@ -17,6 +18,28 @@ public class Order {
     private UUID restaurantOwnerId;
     private UUID clientId;
     private List<ProductSnapshot> productSnapshots = new ArrayList<>();
+
+    public static Order create(UUID clientId) {
+        Order order = new Order();
+        order.setStatus(OrderStatus.EM_CADASTRAMENTO);
+        order.setClientId(clientId);
+        return order;
+    }
+
+    public void applyCatalogResolution(CatalogResolution resolution) {
+        this.restaurantId = resolution.getRestaurantId();
+        this.restaurantOwnerId = resolution.getRestaurantOwnerId();
+        this.productSnapshots = new ArrayList<>(resolution.getProductSnapshots());
+        this.productSnapshots.forEach(snapshot -> snapshot.setOrder(this));
+    }
+
+    public boolean belongsTo(UUID clientId) {
+        return Objects.equals(this.clientId, clientId);
+    }
+
+    public boolean isOwnedBy(UUID ownerId) {
+        return Objects.equals(this.restaurantOwnerId, ownerId);
+    }
 
     public UUID getId() {
         return id;
