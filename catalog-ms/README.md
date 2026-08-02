@@ -27,3 +27,8 @@
 | RNF-09 | Todas as rotinas que alteram dados de produtos precisam garantir (via id de usuario no JWT) que o usuário logado é o dono do restaurante (representado por owner_id) | Alta       |
 | RNF-10 | O sistema não deve gerar tokens JWT, apenas decodifica-los utilizando a secret padrão para todos os ms                                                               | Alta       |
 | RNF-11 | Migrations Liquibase em XML                                                                                                                                          | Alta       |
+
+## DER PostgreSQL
+
+<img width="743" height="600" alt="image" src="https://github.com/user-attachments/assets/5683cfb1-47a0-44f4-a6e8-4bd9a3131bbd" />
+
