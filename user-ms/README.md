@@ -24,6 +24,7 @@
 | RNF-08 | O sistema deve salvar em banco a geolocalização de todos os endereços (lat, long). Utilizar alguma API externa | Baixa      |
 | RNF-09 | Código em arquitetura hexagonal                                                                                | Alta |
 | RNF-10 | Ao iniciar o springboot, o sistema deve rodar as migrations liquibase                                                                               | Alta |
+| RNF-11 | Todas as rotinas que alteram dados de usuários precisam garantir (via id de usuario no JWT) que o usuário logado é o dono do usuário (representado por owner_id) | Alta       |
 
 ## DER PostgreSQL
 <img width="680" height="442" alt="image" src="https://github.com/user-attachments/assets/53baba0a-1a4b-450e-af5c-28b7b9b82325" />

@@ -1,0 +1,8 @@
+target/
+.idea/
+postman/
+HELP.md
+.git/
+.gitignore
+.gitattributes
+*.md

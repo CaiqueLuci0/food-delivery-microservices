@@ -1,1 +1,87 @@
-./.idea
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# --- Editors / IDEs ---
+.idea/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache
+.vscode/
+*.code-workspace
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# --- Java / Maven ---
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# Keep Maven wrapper scripts; ignore only local wrapper jar if present
+.mvn/wrapper/maven-wrapper.jar
+
+# --- Logs / temp ---
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+logs/
+tmp/
+temp/
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.jks
+credentials.json
+secrets/
+
+# --- Spring / local overrides ---
+**/application-local.properties
+**/application-local.yml
+**/application-secret.properties
+**/application-secret.yml
+
+# --- Docker / compose local ---
+docker-compose.override.yml
+.docker/
+
+# --- Coverage / reports ---
+.nyc_output/
+coverage/
+htmlcov/
+*.lcov
+.jacoco/
+jacoco.exec
+
+# --- Cursor / AI tooling (local) ---
+.cursor/
+!.cursor/rules/
+!.cursor/rules/**

@@ -1,0 +1,109 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-user-reference
+      author: restaurant-ms
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: user_reference
+      changes:
+        - createTable:
+            tableName: user_reference
+            columns:
+              - column:
+                  name: id
+                  type: char(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+  - changeSet:
+      id: 001-create-restaurant
+      author: restaurant-ms
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: restaurant
+      changes:
+        - createTable:
+            tableName: restaurant
+            columns:
+              - column:
+                  name: id
+                  type: char(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: description
+                  type: varchar(255)
+              - column:
+                  name: owner_id
+                  type: char(36)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: fk_restaurant_owner
+                    references: user_reference(id)
+
+  - changeSet:
+      id: 001-create-address
+      author: restaurant-ms
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: address
+      changes:
+        - createTable:
+            tableName: address
+            columns:
+              - column:
+                  name: id
+                  type: char(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cep
+                  type: varchar(255)
+              - column:
+                  name: logradouro
+                  type: varchar(255)
+              - column:
+                  name: numero
+                  type: varchar(255)
+              - column:
+                  name: complemento
+                  type: varchar(255)
+              - column:
+                  name: bairro
+                  type: varchar(255)
+              - column:
+                  name: cidade
+                  type: varchar(255)
+              - column:
+                  name: uf
+                  type: varchar(255)
+              - column:
+                  name: referencia
+                  type: varchar(255)
+              - column:
+                  name: latitude
+                  type: decimal(10, 8)
+              - column:
+                  name: longitude
+                  type: decimal(11, 8)
+              - column:
+                  name: restaurant_id
+                  type: char(36)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: fk_address_restaurant
+                    references: restaurant(id)

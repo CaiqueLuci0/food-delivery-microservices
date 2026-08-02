@@ -1,0 +1,363 @@
+{
+  "info": {
+    "name": "food-delivery",
+    "description": "Collection unificada via gateway nginx (localhost:8080) para user-ms e restaurant-ms",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "restaurantId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "User MS",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.token) {",
+                      "    pm.collectionVariables.set('token', json.token);",
+                      "  }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user-ms/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["user-ms", "auth", "login"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "Create User",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('userId', json.id);",
+                      "  }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\",\n  \"address\": {\n    \"cep\": \"01310-100\",\n    \"logradouro\": \"Avenida Paulista\",\n    \"numero\": \"1000\",\n    \"complemento\": \"Apto 101\",\n    \"bairro\": \"Bela Vista\",\n    \"cidade\": \"São Paulo\",\n    \"uf\": \"SP\",\n    \"referencia\": \"Próximo ao MASP\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user-ms/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["user-ms", "users"]
+                }
+              }
+            },
+            {
+              "name": "Create User - Without Address (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Maria Souza\",\n  \"email\": \"maria.souza@email.com\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user-ms/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["user-ms", "users"]
+                }
+              }
+            },
+            {
+              "name": "Find All Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user-ms/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["user-ms", "users"]
+                }
+              }
+            },
+            {
+              "name": "Find User By Id",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user-ms/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["user-ms", "users", "{{userId}}"]
+                }
+              }
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva Atualizado\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user-ms/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["user-ms", "users", "{{userId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete User",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user-ms/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["user-ms", "users", "{{userId}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Restaurant MS",
+      "item": [
+        {
+          "name": "Restaurants",
+          "item": [
+            {
+              "name": "Create Restaurant",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('restaurantId', json.id);",
+                      "  }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Pizzaria Centro\",\n  \"description\": \"Pizza artesanal\",\n  \"address\": {\n    \"cep\": \"01001000\",\n    \"logradouro\": \"Praça da Sé\",\n    \"numero\": \"100\",\n    \"complemento\": \"Loja 1\",\n    \"bairro\": \"Sé\",\n    \"cidade\": \"São Paulo\",\n    \"uf\": \"SP\",\n    \"referencia\": \"Próximo ao metrô\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/restaurant-ms/restaurants",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["restaurant-ms", "restaurants"]
+                }
+              }
+            },
+            {
+              "name": "List Restaurants",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/restaurant-ms/restaurants",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["restaurant-ms", "restaurants"]
+                }
+              }
+            },
+            {
+              "name": "Search Restaurants",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/restaurant-ms/restaurants?search=pizza",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["restaurant-ms", "restaurants"],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "pizza"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Restaurant By Id",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/restaurant-ms/restaurants/{{restaurantId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["restaurant-ms", "restaurants", "{{restaurantId}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Restaurant",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Pizzaria Centro Atualizada\",\n  \"description\": \"Pizza artesanal e massas\",\n  \"address\": {\n    \"cep\": \"01001000\",\n    \"logradouro\": \"Praça da Sé\",\n    \"numero\": \"200\",\n    \"complemento\": \"Loja 2\",\n    \"bairro\": \"Sé\",\n    \"cidade\": \"São Paulo\",\n    \"uf\": \"SP\",\n    \"referencia\": \"Esquina\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/restaurant-ms/restaurants/{{restaurantId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["restaurant-ms", "restaurants", "{{restaurantId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Restaurant",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/restaurant-ms/restaurants/{{restaurantId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["restaurant-ms", "restaurants", "{{restaurantId}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

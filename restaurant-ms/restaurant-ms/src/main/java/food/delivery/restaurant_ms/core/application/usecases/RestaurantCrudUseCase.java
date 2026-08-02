@@ -1,0 +1,131 @@
+package food.delivery.restaurant_ms.core.application.usecases;
+
+import food.delivery.restaurant_ms.core.application.ports.in.RestaurantCrudUseCaseInputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.CepLookupOutputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.RestaurantCreatedEventOutputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.RestaurantDeletedEventOutputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.RestaurantRepositoryOutputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.UserReferenceRepositoryOutputPort;
+import food.delivery.restaurant_ms.core.domain.entities.Address;
+import food.delivery.restaurant_ms.core.domain.entities.CepAddress;
+import food.delivery.restaurant_ms.core.domain.entities.Restaurant;
+import food.delivery.restaurant_ms.core.domain.enums.ConstMessagesEnum;
+import food.delivery.restaurant_ms.core.domain.exceptions.ConflictException;
+import food.delivery.restaurant_ms.core.domain.exceptions.ForbiddenException;
+import food.delivery.restaurant_ms.core.domain.exceptions.NotFoundException;
+
+import java.util.List;
+import java.util.UUID;
+
+public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
+
+    private final RestaurantRepositoryOutputPort restaurantRepositoryOutputPort;
+    private final UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort;
+    private final CepLookupOutputPort cepLookupOutputPort;
+    private final RestaurantCreatedEventOutputPort restaurantCreatedEventOutputPort;
+    private final RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort;
+
+    public RestaurantCrudUseCase(
+            RestaurantRepositoryOutputPort restaurantRepositoryOutputPort,
+            UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort,
+            CepLookupOutputPort cepLookupOutputPort,
+            RestaurantCreatedEventOutputPort restaurantCreatedEventOutputPort,
+            RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort
+    ) {
+        this.restaurantRepositoryOutputPort = restaurantRepositoryOutputPort;
+        this.userReferenceRepositoryOutputPort = userReferenceRepositoryOutputPort;
+        this.cepLookupOutputPort = cepLookupOutputPort;
+        this.restaurantCreatedEventOutputPort = restaurantCreatedEventOutputPort;
+        this.restaurantDeletedEventOutputPort = restaurantDeletedEventOutputPort;
+    }
+
+    @Override
+    public Restaurant findById(UUID id) {
+        return restaurantRepositoryOutputPort.findById(id)
+                .orElseThrow(() -> new NotFoundException(ConstMessagesEnum.NOT_FOUND.getMessage()));
+    }
+
+    @Override
+    public List<Restaurant> findAll(String search) {
+        if (search == null || search.isBlank()) {
+            return restaurantRepositoryOutputPort.findAll();
+        }
+        return restaurantRepositoryOutputPort.searchByNameOrDescription(search.trim());
+    }
+
+    @Override
+    public Restaurant create(UUID authenticatedUserId, Restaurant restaurant, Address address) {
+        if (address == null) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+        if (!userReferenceRepositoryOutputPort.existsById(authenticatedUserId)) {
+            throw new ConflictException(ConstMessagesEnum.OWNER_NOT_FOUND.getMessage());
+        }
+        if (restaurantRepositoryOutputPort.existsByOwnerId(authenticatedUserId)) {
+            throw new ConflictException(ConstMessagesEnum.RESTAURANT_ALREADY_EXISTS.getMessage());
+        }
+
+        enrichAddressFromCep(address);
+        restaurant.setOwnerId(authenticatedUserId);
+        restaurant.setAddress(address);
+        address.setRestaurant(restaurant);
+
+        Restaurant saved = restaurantRepositoryOutputPort.save(restaurant);
+        restaurantCreatedEventOutputPort.publish(saved.getId());
+        return saved;
+    }
+
+    @Override
+    public Restaurant update(UUID authenticatedUserId, UUID restaurantId, Restaurant restaurant, Address address) {
+        Restaurant existing = findById(restaurantId);
+        assertOwner(authenticatedUserId, existing);
+
+        existing.setName(restaurant.getName());
+        existing.setDescription(restaurant.getDescription());
+
+        if (address != null) {
+            enrichAddressFromCep(address);
+            Address existingAddress = existing.getAddress();
+            if (existingAddress == null) {
+                existing.setAddress(address);
+                address.setRestaurant(existing);
+            } else {
+                existingAddress.setCep(address.getCep());
+                existingAddress.setLogradouro(address.getLogradouro());
+                existingAddress.setNumero(address.getNumero());
+                existingAddress.setComplemento(address.getComplemento());
+                existingAddress.setBairro(address.getBairro());
+                existingAddress.setCidade(address.getCidade());
+                existingAddress.setUf(address.getUf());
+                existingAddress.setReferencia(address.getReferencia());
+            }
+        }
+
+        return restaurantRepositoryOutputPort.save(existing);
+    }
+
+    @Override
+    public void delete(UUID authenticatedUserId, UUID restaurantId) {
+        Restaurant existing = findById(restaurantId);
+        assertOwner(authenticatedUserId, existing);
+        UUID deletedId = existing.getId();
+        restaurantRepositoryOutputPort.delete(existing);
+        restaurantDeletedEventOutputPort.publish(deletedId);
+    }
+
+    private void enrichAddressFromCep(Address address) {
+        CepAddress cepAddress = cepLookupOutputPort.findByCep(address.getCep())
+                .orElseThrow(() -> new ConflictException(ConstMessagesEnum.INVALID_CEP.getMessage()));
+        address.setCep(cepAddress.getCep());
+        address.setLogradouro(cepAddress.getLogradouro());
+        address.setBairro(cepAddress.getBairro());
+        address.setCidade(cepAddress.getCidade());
+        address.setUf(cepAddress.getUf());
+    }
+
+    private void assertOwner(UUID authenticatedUserId, Restaurant restaurant) {
+        if (authenticatedUserId == null || !authenticatedUserId.equals(restaurant.getOwnerId())) {
+            throw new ForbiddenException(ConstMessagesEnum.ACCESS_DENIED.getMessage());
+        }
+    }
+}
