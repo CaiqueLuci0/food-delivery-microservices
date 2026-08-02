@@ -45,7 +45,8 @@
 | RNF-12 | WebSocket para acompanhar o status do pedido                                                                                                         | Média      |          |
 | RNF-13 | O sistema recebe apenas id do pedido nas filas de payment-approved e payment-failed, então o order-ms deve buscar o pedido no banco e atualizar o status de pagamento do pedido. | Alta | |
 ## DER PostgreSQL
-<img width="997" height="518" alt="image" src="https://github.com/user-attachments/assets/359e40ef-96b7-4279-832c-a780f64f7c6f" />
+<img width="1001" height="479" alt="image" src="https://github.com/user-attachments/assets/3324640b-340f-4bbc-9dad-f54023f22449" />
+
 
 ### Observações
 - User_reference vem da fila de usuário criado.
