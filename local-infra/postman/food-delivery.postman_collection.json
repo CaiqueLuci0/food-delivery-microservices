@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "food-delivery",
-    "description": "Collection unificada via gateway nginx (localhost:8080) para user-ms e restaurant-ms",
+    "description": "Collection unificada via gateway nginx (localhost:8080) para user-ms, restaurant-ms e catalog-ms",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -19,6 +19,14 @@
     },
     {
       "key": "restaurantId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "specOptionId",
       "value": ""
     }
   ],
@@ -379,6 +387,196 @@
                   "raw": "{{baseUrl}}/restaurant-ms/restaurants/{{restaurantId}}",
                   "host": ["{{baseUrl}}"],
                   "path": ["restaurant-ms", "restaurants", "{{restaurantId}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Catalog MS",
+      "item": [
+        {
+          "name": "Products",
+          "item": [
+            {
+              "name": "Create Product",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('productId', json.id);",
+                      "  }",
+                      "  if (json.specifications && json.specifications[0] && json.specifications[0].specOptions && json.specifications[0].specOptions[0]) {",
+                      "    pm.collectionVariables.set('specOptionId', json.specifications[0].specOptions[0].id);",
+                      "  }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Pizza Margherita\",\n  \"price\": 45.9,\n  \"description\": \"Mussarela e manjericão\",\n  \"specifications\": [\n    {\n      \"name\": \"Tamanho\",\n      \"description\": \"Escolha o tamanho\",\n      \"specOptions\": [\n        {\n          \"name\": \"Média\",\n          \"description\": \"30cm\",\n          \"extraPrice\": 0\n        },\n        {\n          \"name\": \"Grande\",\n          \"description\": \"40cm\",\n          \"extraPrice\": 10\n        }\n      ]\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/catalog-ms/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["catalog-ms", "products"]
+                }
+              }
+            },
+            {
+              "name": "List Products By Restaurant",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/catalog-ms/products?restaurantId={{restaurantId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["catalog-ms", "products"],
+                  "query": [
+                    {
+                      "key": "restaurantId",
+                      "value": "{{restaurantId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Search Products",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/catalog-ms/products?restaurantId={{restaurantId}}&search=pizza",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["catalog-ms", "products"],
+                  "query": [
+                    {
+                      "key": "restaurantId",
+                      "value": "{{restaurantId}}"
+                    },
+                    {
+                      "key": "search",
+                      "value": "pizza"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Product By Id",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/catalog-ms/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["catalog-ms", "products", "{{productId}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Product",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Pizza Margherita Especial\",\n  \"price\": 49.9,\n  \"description\": \"Mussarela, manjericão e tomate\",\n  \"specifications\": [\n    {\n      \"name\": \"Tamanho\",\n      \"description\": \"Escolha o tamanho\",\n      \"specOptions\": [\n        {\n          \"name\": \"Família\",\n          \"description\": \"50cm\",\n          \"extraPrice\": 20\n        }\n      ]\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/catalog-ms/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["catalog-ms", "products", "{{productId}}"]
+                }
+              }
+            },
+            {
+              "name": "Resolve Product",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/catalog-ms/products/resolve?productId={{productId}}&specOptionIds={{specOptionId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["catalog-ms", "products", "resolve"],
+                  "query": [
+                    {
+                      "key": "productId",
+                      "value": "{{productId}}"
+                    },
+                    {
+                      "key": "specOptionIds",
+                      "value": "{{specOptionId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Product",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/catalog-ms/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["catalog-ms", "products", "{{productId}}"]
                 }
               }
             }

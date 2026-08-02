@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="001-create-restaurant-reference" author="catalog-ms">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="restaurant_reference"/>
+            </not>
+        </preConditions>
+        <createTable tableName="restaurant_reference">
+            <column name="owner_id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_restaurant_reference"/>
+            </column>
+            <column name="restaurant_id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_restaurant_reference"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="001-create-product" author="catalog-ms">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="product"/>
+            </not>
+        </preConditions>
+        <createTable tableName="product">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_product"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="price" type="double"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="owner_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="restaurant_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="product"
+                baseColumnNames="owner_id,restaurant_id"
+                referencedTableName="restaurant_reference"
+                referencedColumnNames="owner_id,restaurant_id"
+                constraintName="fk_product_restaurant_reference"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="001-create-specification" author="catalog-ms">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="specification"/>
+            </not>
+        </preConditions>
+        <createTable tableName="specification">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_specification"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="specification"
+                baseColumnNames="product_id"
+                referencedTableName="product"
+                referencedColumnNames="id"
+                constraintName="fk_specification_product"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="001-create-spec-option" author="catalog-ms">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="spec_option"/>
+            </not>
+        </preConditions>
+        <createTable tableName="spec_option">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_spec_option"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="extra_price" type="double"/>
+            <column name="spec_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="spec_option"
+                baseColumnNames="spec_id"
+                referencedTableName="specification"
+                referencedColumnNames="id"
+                constraintName="fk_spec_option_specification"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

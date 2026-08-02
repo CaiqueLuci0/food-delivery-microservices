@@ -1,0 +1,32 @@
+package food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.exception;
+
+import java.util.Map;
+
+public class HttpExceptionMessage {
+
+    private final int status;
+    private final String message;
+    private final Map<String, String> errors;
+
+    public HttpExceptionMessage(int status, String message) {
+        this(status, message, null);
+    }
+
+    public HttpExceptionMessage(int status, String message, Map<String, String> errors) {
+        this.status = status;
+        this.message = message;
+        this.errors = errors;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Map<String, String> getErrors() {
+        return errors;
+    }
+}
