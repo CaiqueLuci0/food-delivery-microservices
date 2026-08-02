@@ -12,18 +12,18 @@
 
 
 ## Requisitos não Funcionais
-| ID     | Descrição                                                                                                      | Prioridade |
-|--------|----------------------------------------------------------------------------------------------------------------|------------|
-| RNF-01 | As senhas dos usuários devem ser armazenadas utilizando algoritmo de hash seguro (ex.: BCrypt).                | Alta       | 
-| RNF-02 | Todas as rotas protegidas da API devem exigir autenticação via JWT.                                            | Alta       |
-| RNF-03 | O sistema deve usar PostgreSQL                                                                                 | Alta       |
-| RNF-04 | Utilizar mescla dos padrões de cache "write through" e "lazy loading" com Redis                                          | Baixa      |
-| RNF-05 | O sistema deve usar RabbitMQ para publicar filas e tópicos                                                     | Alta       |
-| RNF-06 | O Sistema deve armazenar imagens em um bucket S3                                                               | Baixa      |
-| RNF-07 | O sistema deve se conectar com a API do VIA CEP para validar o endereço no cadastro                            | Média      |
+| ID     | Descrição                                                                          | Prioridade |
+|--------|------------------------------------------------------------------------------------|------------|
+| RNF-01 | As senhas dos usuários devem ser armazenadas utilizando algoritmo de hash seguro (ex.: BCrypt). | Alta       | 
+| RNF-02 | Todas as rotas protegidas da API devem exigir autenticação via JWT.                | Alta       |
+| RNF-03 | O sistema deve usar PostgreSQL                                                     | Alta       |
+| RNF-04 | Utilizar mescla dos padrões de cache "write through" e "lazy loading" com Redis    | Baixa      |
+| RNF-05 | O sistema deve usar RabbitMQ para publicar filas e tópicos                         | Alta       |
+| RNF-06 | O Sistema deve armazenar imagens em um bucket S3                                   | Baixa      |
+| RNF-07 | O sistema deve se conectar com a API do VIA CEP para validar o endereço no cadastro | Média      |
 | RNF-08 | O sistema deve salvar em banco a geolocalização de todos os endereços (lat, long). Utilizar alguma API externa | Baixa      |
-| RNF-09 | Código em arquitetura hexagonal                                                                                | Alta |
-| RNF-10 | Ao iniciar o springboot, o sistema deve rodar as migrations liquibase                                                                               | Alta |
+| RNF-09 | Código em arquitetura hexagonal                                                    | Alta |
+| RNF-10 | Ao iniciar o springboot, o sistema deve rodar as migrations liquibase              | Alta |
 | RNF-11 | Todas as rotinas que alteram dados de usuários precisam garantir (via id de usuario no JWT) que o usuário logado é o dono do usuário (representado por owner_id) | Alta       |
 
 ## DER PostgreSQL

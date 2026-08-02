@@ -20,10 +20,10 @@ public class RestaurantCreatedEventProducer implements RestaurantCreatedEventOut
     }
 
     @Override
-    public void publish(UUID restaurantId) {
+    public void publish(UUID restaurantId, UUID ownerId) {
         rabbitTemplate.convertAndSend(
                 messagingProperties.getRestaurantCreatedQueue(),
-                new RestaurantCreatedEvent(restaurantId)
+                new RestaurantCreatedEvent(restaurantId, ownerId)
         );
     }
 }

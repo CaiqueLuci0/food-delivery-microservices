@@ -95,7 +95,7 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
         address.setRestaurant(restaurant);
 
         Restaurant saved = restaurantRepositoryOutputPort.save(restaurant);
-        restaurantCreatedEventOutputPort.publish(saved.getId());
+        restaurantCreatedEventOutputPort.publish(saved.getId(), saved.getOwnerId());
         return saved;
     }
 

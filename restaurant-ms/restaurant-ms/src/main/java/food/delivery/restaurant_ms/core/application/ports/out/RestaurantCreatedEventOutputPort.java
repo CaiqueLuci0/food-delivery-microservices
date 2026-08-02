@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public interface RestaurantCreatedEventOutputPort {
 
-    void publish(UUID restaurantId);
+    void publish(UUID restaurantId, UUID ownerId);
 }
