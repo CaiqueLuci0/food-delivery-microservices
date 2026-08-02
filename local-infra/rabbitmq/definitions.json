@@ -146,6 +146,13 @@
       "arguments": {}
     },
     {
+      "name": "order-deleted",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
       "name": "payment-approved",
       "vhost": "/",
       "durable": true,

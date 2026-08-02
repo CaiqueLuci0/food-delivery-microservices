@@ -3,6 +3,7 @@ package food.delivery.order_ms.core.application.usecases;
 import food.delivery.order_ms.core.application.ports.in.OrderUseCaseInputPort;
 import food.delivery.order_ms.core.application.ports.out.CatalogResolveOutputPort;
 import food.delivery.order_ms.core.application.ports.out.OrderCreatedEventOutputPort;
+import food.delivery.order_ms.core.application.ports.out.OrderDeletedEventOutputPort;
 import food.delivery.order_ms.core.application.ports.out.OrderRepositoryOutputPort;
 import food.delivery.order_ms.core.application.ports.out.UserReferenceRepositoryOutputPort;
 import food.delivery.order_ms.core.domain.entities.CatalogResolution;
@@ -44,17 +45,20 @@ public class OrderUseCase implements OrderUseCaseInputPort {
     private final UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort;
     private final CatalogResolveOutputPort catalogResolveOutputPort;
     private final OrderCreatedEventOutputPort orderCreatedEventOutputPort;
+    private final OrderDeletedEventOutputPort orderDeletedEventOutputPort;
 
     public OrderUseCase(
             OrderRepositoryOutputPort orderRepositoryOutputPort,
             UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort,
             CatalogResolveOutputPort catalogResolveOutputPort,
-            OrderCreatedEventOutputPort orderCreatedEventOutputPort
+            OrderCreatedEventOutputPort orderCreatedEventOutputPort,
+            OrderDeletedEventOutputPort orderDeletedEventOutputPort
     ) {
         this.orderRepositoryOutputPort = orderRepositoryOutputPort;
         this.userReferenceRepositoryOutputPort = userReferenceRepositoryOutputPort;
         this.catalogResolveOutputPort = catalogResolveOutputPort;
         this.orderCreatedEventOutputPort = orderCreatedEventOutputPort;
+        this.orderDeletedEventOutputPort = orderDeletedEventOutputPort;
     }
 
     @Override
@@ -127,11 +131,15 @@ public class OrderUseCase implements OrderUseCaseInputPort {
 
         if (isClient && CLIENT_CANCELABLE.contains(order.getStatus())) {
             order.setStatus(OrderStatus.CANCELADO);
-            return orderRepositoryOutputPort.save(order);
+            Order saved = orderRepositoryOutputPort.save(order);
+            orderDeletedEventOutputPort.publish(saved.getId());
+            return saved;
         }
         if (isOwner && OWNER_CANCELABLE.contains(order.getStatus())) {
             order.setStatus(OrderStatus.CANCELADO);
-            return orderRepositoryOutputPort.save(order);
+            Order saved = orderRepositoryOutputPort.save(order);
+            orderDeletedEventOutputPort.publish(saved.getId());
+            return saved;
         }
         if (!isClient && !isOwner) {
             throw new ForbiddenException(ConstMessagesEnum.ACCESS_DENIED.getMessage());

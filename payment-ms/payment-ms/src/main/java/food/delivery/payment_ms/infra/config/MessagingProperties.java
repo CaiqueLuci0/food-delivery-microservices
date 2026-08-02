@@ -1,32 +1,14 @@
-package food.delivery.order_ms.infra.config;
+package food.delivery.payment_ms.infra.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "app.messaging")
 public class MessagingProperties {
 
-    private String userCreatedQueue;
-    private String userDeletedQueue;
     private String orderCreatedQueue;
     private String orderDeletedQueue;
     private String paymentApprovedQueue;
     private String paymentFailedQueue;
-
-    public String getUserCreatedQueue() {
-        return userCreatedQueue;
-    }
-
-    public void setUserCreatedQueue(String userCreatedQueue) {
-        this.userCreatedQueue = userCreatedQueue;
-    }
-
-    public String getUserDeletedQueue() {
-        return userDeletedQueue;
-    }
-
-    public void setUserDeletedQueue(String userDeletedQueue) {
-        this.userDeletedQueue = userDeletedQueue;
-    }
 
     public String getOrderCreatedQueue() {
         return orderCreatedQueue;

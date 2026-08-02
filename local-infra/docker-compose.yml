@@ -44,6 +44,20 @@ services:
       timeout: 5s
       retries: 5
 
+  mongo-payment:
+    image: mongo:7
+    container_name: payment-ms-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-payment-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   mysql:
     image: mysql:8
     container_name: restaurant-ms-mysql
@@ -75,7 +89,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "rabbitmq-diagnostics -q ping && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-dlq && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-dlq && rabbitmqctl list_queues name | grep -q order-ms-user-created-queue && rabbitmqctl list_queues name | grep -q order-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q order-created && rabbitmqctl list_queues name | grep -q payment-approved && rabbitmqctl list_queues name | grep -q payment-failed && rabbitmqctl list_queues name | grep -q restaurant-created && rabbitmqctl list_queues name | grep -q restaurant-deleted && rabbitmqctl list_exchanges name | grep -q user.created && rabbitmqctl list_exchanges name | grep -q user.deleted"
+          "rabbitmq-diagnostics -q ping && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-dlq && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-dlq && rabbitmqctl list_queues name | grep -q order-ms-user-created-queue && rabbitmqctl list_queues name | grep -q order-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q order-created && rabbitmqctl list_queues name | grep -q order-deleted && rabbitmqctl list_queues name | grep -q payment-approved && rabbitmqctl list_queues name | grep -q payment-failed && rabbitmqctl list_queues name | grep -q restaurant-created && rabbitmqctl list_queues name | grep -q restaurant-deleted && rabbitmqctl list_exchanges name | grep -q user.created && rabbitmqctl list_exchanges name | grep -q user.deleted"
         ]
       interval: 10s
       timeout: 10s
@@ -175,6 +189,26 @@ services:
       catalog-ms:
         condition: service_started
 
+  payment-ms:
+    build:
+      context: ../payment-ms/payment-ms
+      dockerfile: Dockerfile
+    image: local-infra-payment-ms:local
+    container_name: payment-ms-app
+    ports:
+      - "8005:8005"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-payment:27017/payment_ms
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: usr
+      SPRING_RABBITMQ_PASSWORD: pwd
+    depends_on:
+      mongo-payment:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   nginx:
     image: nginx:alpine
     container_name: food-delivery-nginx
@@ -187,6 +221,7 @@ services:
       - restaurant-ms
       - catalog-ms
       - order-ms
+      - payment-ms
 
   seed:
     image: alpine:3.20
@@ -212,6 +247,8 @@ services:
         condition: service_healthy
       postgres-order:
         condition: service_healthy
+      mongo-payment:
+        condition: service_healthy
       mysql:
         condition: service_healthy
       rabbitmq:
@@ -224,6 +261,11 @@ services:
         condition: service_started
       order-ms:
         condition: service_started
+      payment-ms:
+        condition: service_started
       nginx:
         condition: service_started
     restart: "no"
+
+volumes:
+  mongo-payment-data:

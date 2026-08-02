@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "food-delivery",
-    "description": "Collection unificada via gateway nginx (localhost:8080) para user-ms, restaurant-ms, catalog-ms e order-ms",
+    "description": "Collection unificada via gateway nginx (localhost:8080) para user-ms, restaurant-ms, catalog-ms, order-ms e payment-ms",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -775,6 +775,28 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Payment MS",
+      "item": [
+        {
+          "name": "Mark Payment As Paid",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payment-ms/payments/{{orderId}}/pay",
+              "host": ["{{baseUrl}}"],
+              "path": ["payment-ms", "payments", "{{orderId}}", "pay"]
+            }
+          }
         }
       ]
     }
