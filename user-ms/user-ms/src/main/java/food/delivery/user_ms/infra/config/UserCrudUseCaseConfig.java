@@ -2,6 +2,7 @@ package food.delivery.user_ms.infra.config;
 
 import food.delivery.user_ms.core.application.ports.in.UserCrudUseCaseInputPort;
 import food.delivery.user_ms.core.application.ports.out.CepLookupOutputPort;
+import food.delivery.user_ms.core.application.ports.out.GeocodingOutputPort;
 import food.delivery.user_ms.core.application.ports.out.PasswordEncoderOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserCreatedEventOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserDeletedEventOutputPort;
@@ -19,14 +20,16 @@ public class UserCrudUseCaseConfig {
             PasswordEncoderOutputPort passwordEncoderOutputPort,
             UserCreatedEventOutputPort userCreatedEventOutputPort,
             UserDeletedEventOutputPort userDeletedEventOutputPort,
-            CepLookupOutputPort cepLookupOutputPort
+            CepLookupOutputPort cepLookupOutputPort,
+            GeocodingOutputPort geocodingOutputPort
     ) {
         return new UserCrudUseCase(
                 repository,
                 passwordEncoderOutputPort,
                 userCreatedEventOutputPort,
                 userDeletedEventOutputPort,
-                cepLookupOutputPort
+                cepLookupOutputPort,
+                geocodingOutputPort
         );
     }
 }

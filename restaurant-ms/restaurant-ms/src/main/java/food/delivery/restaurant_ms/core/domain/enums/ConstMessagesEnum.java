@@ -9,6 +9,7 @@ public enum ConstMessagesEnum {
     INVALID_CREDENTIALS("Credenciais inválidas"),
     ACCESS_DENIED("Acesso negado"),
     INVALID_CEP("CEP inválido ou não encontrado"),
+    INVALID_LOCATION("Localização não encontrada para o endereço"),
     OWNER_NOT_FOUND("Usuário dono não encontrado"),
     RESTAURANT_ALREADY_EXISTS("Usuário já possui um restaurante");
 

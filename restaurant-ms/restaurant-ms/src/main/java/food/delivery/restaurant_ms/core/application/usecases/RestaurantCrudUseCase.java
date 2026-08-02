@@ -2,26 +2,32 @@ package food.delivery.restaurant_ms.core.application.usecases;
 
 import food.delivery.restaurant_ms.core.application.ports.in.RestaurantCrudUseCaseInputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.CepLookupOutputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.GeocodingOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantCreatedEventOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantDeletedEventOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantRepositoryOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.UserReferenceRepositoryOutputPort;
 import food.delivery.restaurant_ms.core.domain.entities.Address;
 import food.delivery.restaurant_ms.core.domain.entities.CepAddress;
+import food.delivery.restaurant_ms.core.domain.entities.GeoCoordinates;
 import food.delivery.restaurant_ms.core.domain.entities.Restaurant;
 import food.delivery.restaurant_ms.core.domain.enums.ConstMessagesEnum;
 import food.delivery.restaurant_ms.core.domain.exceptions.ConflictException;
 import food.delivery.restaurant_ms.core.domain.exceptions.ForbiddenException;
 import food.delivery.restaurant_ms.core.domain.exceptions.NotFoundException;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
 
+    private static final double SEARCH_RADIUS_METERS = 3000d;
+
     private final RestaurantRepositoryOutputPort restaurantRepositoryOutputPort;
     private final UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort;
     private final CepLookupOutputPort cepLookupOutputPort;
+    private final GeocodingOutputPort geocodingOutputPort;
     private final RestaurantCreatedEventOutputPort restaurantCreatedEventOutputPort;
     private final RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort;
 
@@ -29,12 +35,14 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
             RestaurantRepositoryOutputPort restaurantRepositoryOutputPort,
             UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort,
             CepLookupOutputPort cepLookupOutputPort,
+            GeocodingOutputPort geocodingOutputPort,
             RestaurantCreatedEventOutputPort restaurantCreatedEventOutputPort,
             RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort
     ) {
         this.restaurantRepositoryOutputPort = restaurantRepositoryOutputPort;
         this.userReferenceRepositoryOutputPort = userReferenceRepositoryOutputPort;
         this.cepLookupOutputPort = cepLookupOutputPort;
+        this.geocodingOutputPort = geocodingOutputPort;
         this.restaurantCreatedEventOutputPort = restaurantCreatedEventOutputPort;
         this.restaurantDeletedEventOutputPort = restaurantDeletedEventOutputPort;
     }
@@ -46,11 +54,27 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
     }
 
     @Override
-    public List<Restaurant> findAll(String search) {
-        if (search == null || search.isBlank()) {
+    public List<Restaurant> findAll(String search, BigDecimal latitude, BigDecimal longitude) {
+        boolean hasLatitude = latitude != null;
+        boolean hasLongitude = longitude != null;
+        if (hasLatitude != hasLongitude) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+
+        String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
+
+        if (hasLatitude) {
+            return restaurantRepositoryOutputPort.findWithinRadius(
+                    latitude,
+                    longitude,
+                    SEARCH_RADIUS_METERS,
+                    normalizedSearch
+            );
+        }
+        if (normalizedSearch == null) {
             return restaurantRepositoryOutputPort.findAll();
         }
-        return restaurantRepositoryOutputPort.searchByNameOrDescription(search.trim());
+        return restaurantRepositoryOutputPort.searchByNameOrDescription(normalizedSearch);
     }
 
     @Override
@@ -65,7 +89,7 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
             throw new ConflictException(ConstMessagesEnum.RESTAURANT_ALREADY_EXISTS.getMessage());
         }
 
-        enrichAddressFromCep(address);
+        enrichAddress(address);
         restaurant.setOwnerId(authenticatedUserId);
         restaurant.setAddress(address);
         address.setRestaurant(restaurant);
@@ -84,7 +108,7 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
         existing.setDescription(restaurant.getDescription());
 
         if (address != null) {
-            enrichAddressFromCep(address);
+            enrichAddress(address);
             Address existingAddress = existing.getAddress();
             if (existingAddress == null) {
                 existing.setAddress(address);
@@ -98,6 +122,8 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
                 existingAddress.setCidade(address.getCidade());
                 existingAddress.setUf(address.getUf());
                 existingAddress.setReferencia(address.getReferencia());
+                existingAddress.setLatitude(address.getLatitude());
+                existingAddress.setLongitude(address.getLongitude());
             }
         }
 
@@ -113,7 +139,7 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
         restaurantDeletedEventOutputPort.publish(deletedId);
     }
 
-    private void enrichAddressFromCep(Address address) {
+    private void enrichAddress(Address address) {
         CepAddress cepAddress = cepLookupOutputPort.findByCep(address.getCep())
                 .orElseThrow(() -> new ConflictException(ConstMessagesEnum.INVALID_CEP.getMessage()));
         address.setCep(cepAddress.getCep());
@@ -121,6 +147,11 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
         address.setBairro(cepAddress.getBairro());
         address.setCidade(cepAddress.getCidade());
         address.setUf(cepAddress.getUf());
+
+        GeoCoordinates coordinates = geocodingOutputPort.geocode(address)
+                .orElseThrow(() -> new ConflictException(ConstMessagesEnum.INVALID_LOCATION.getMessage()));
+        address.setLatitude(coordinates.getLatitude());
+        address.setLongitude(coordinates.getLongitude());
     }
 
     private void assertOwner(UUID authenticatedUserId, Restaurant restaurant) {

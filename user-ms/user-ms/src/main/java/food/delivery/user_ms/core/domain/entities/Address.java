@@ -1,5 +1,6 @@
 package food.delivery.user_ms.core.domain.entities;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public class Address {
@@ -13,7 +14,12 @@ public class Address {
     private String cidade;
     private String uf;
     private String referencia;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private User user;
+
+    public Address() {
+    }
 
     public Address(UUID id, String cep, String logradouro, String numero, String complemento, String bairro, String cidade, String uf, String referencia, User user) {
         this.id = id;
@@ -26,17 +32,6 @@ public class Address {
         this.uf = uf;
         this.referencia = referencia;
         this.user = user;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Address() {
     }
 
     public UUID getId() {
@@ -109,5 +104,29 @@ public class Address {
 
     public void setReferencia(String referencia) {
         this.referencia = referencia;
+    }
+
+    public BigDecimal getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(BigDecimal latitude) {
+        this.latitude = latitude;
+    }
+
+    public BigDecimal getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(BigDecimal longitude) {
+        this.longitude = longitude;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

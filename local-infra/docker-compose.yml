@@ -68,6 +68,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: usr
       SPRING_RABBITMQ_PASSWORD: pwd
+      GEOAPIFY_API_KEY: d1f434e8f38e4092af7f87a16b65754d
     depends_on:
       postgres:
         condition: service_healthy
@@ -90,6 +91,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: usr
       SPRING_RABBITMQ_PASSWORD: pwd
+      GEOAPIFY_API_KEY: d1f434e8f38e4092af7f87a16b65754d
     depends_on:
       mysql:
         condition: service_healthy

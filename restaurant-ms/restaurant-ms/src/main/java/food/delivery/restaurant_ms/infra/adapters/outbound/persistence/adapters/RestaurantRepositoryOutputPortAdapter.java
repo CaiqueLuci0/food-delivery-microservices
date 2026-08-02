@@ -7,6 +7,7 @@ import food.delivery.restaurant_ms.infra.adapters.outbound.persistence.jpareposi
 import food.delivery.restaurant_ms.infra.adapters.outbound.persistence.mappers.RestaurantPersistenceMapper;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,6 +47,18 @@ public class RestaurantRepositoryOutputPortAdapter implements RestaurantReposito
     @Override
     public List<Restaurant> searchByNameOrDescription(String search) {
         return jpaRestaurantRepository.searchByNameOrDescription(search).stream()
+                .map(RestaurantPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Restaurant> findWithinRadius(
+            BigDecimal latitude,
+            BigDecimal longitude,
+            double radiusMeters,
+            String search
+    ) {
+        return jpaRestaurantRepository.findWithinRadius(latitude, longitude, radiusMeters, search).stream()
                 .map(RestaurantPersistenceMapper::toDomain)
                 .toList();
     }

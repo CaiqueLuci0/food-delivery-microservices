@@ -1,7 +1,14 @@
 package food.delivery.user_ms.infra.adapters.outbound.persistence.jpaentities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -19,6 +26,8 @@ public class JpaAddress {
     private String cidade;
     private String uf;
     private String referencia;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)
@@ -97,6 +106,22 @@ public class JpaAddress {
 
     public void setReferencia(String referencia) {
         this.referencia = referencia;
+    }
+
+    public BigDecimal getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(BigDecimal latitude) {
+        this.latitude = latitude;
+    }
+
+    public BigDecimal getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(BigDecimal longitude) {
+        this.longitude = longitude;
     }
 
     public JpaUser getUser() {

@@ -2,12 +2,14 @@ package food.delivery.user_ms.core.application.usecases;
 
 import food.delivery.user_ms.core.application.ports.in.UserCrudUseCaseInputPort;
 import food.delivery.user_ms.core.application.ports.out.CepLookupOutputPort;
+import food.delivery.user_ms.core.application.ports.out.GeocodingOutputPort;
 import food.delivery.user_ms.core.application.ports.out.PasswordEncoderOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserCreatedEventOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserDeletedEventOutputPort;
 import food.delivery.user_ms.core.application.ports.out.UserRepositoryOutputPort;
 import food.delivery.user_ms.core.domain.entities.Address;
 import food.delivery.user_ms.core.domain.entities.CepAddress;
+import food.delivery.user_ms.core.domain.entities.GeoCoordinates;
 import food.delivery.user_ms.core.domain.entities.User;
 import food.delivery.user_ms.core.domain.enums.ConstMessagesEnum;
 import food.delivery.user_ms.core.domain.exceptions.ConflictException;
@@ -24,19 +26,22 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
     private final UserCreatedEventOutputPort userCreatedEventOutputPort;
     private final UserDeletedEventOutputPort userDeletedEventOutputPort;
     private final CepLookupOutputPort cepLookupOutputPort;
+    private final GeocodingOutputPort geocodingOutputPort;
 
     public UserCrudUseCase(
             UserRepositoryOutputPort userRepositoryOutputPort,
             PasswordEncoderOutputPort passwordEncoderOutputPort,
             UserCreatedEventOutputPort userCreatedEventOutputPort,
             UserDeletedEventOutputPort userDeletedEventOutputPort,
-            CepLookupOutputPort cepLookupOutputPort
+            CepLookupOutputPort cepLookupOutputPort,
+            GeocodingOutputPort geocodingOutputPort
     ) {
         this.userRepositoryOutputPort = userRepositoryOutputPort;
         this.passwordEncoderOutputPort = passwordEncoderOutputPort;
         this.userCreatedEventOutputPort = userCreatedEventOutputPort;
         this.userDeletedEventOutputPort = userDeletedEventOutputPort;
         this.cepLookupOutputPort = cepLookupOutputPort;
+        this.geocodingOutputPort = geocodingOutputPort;
     }
 
     @Override
@@ -56,9 +61,7 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
             throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
         }
 
-        CepAddress cepAddress = cepLookupOutputPort.findByCep(address.getCep())
-                .orElseThrow(() -> new ConflictException(ConstMessagesEnum.INVALID_CEP.getMessage()));
-        applyCepAddress(address, cepAddress);
+        enrichAddress(address);
 
         if (this.userRepositoryOutputPort.existsByEmail(user.getEmail())) {
             throw new ConflictException(ConstMessagesEnum.EMAIL_ALREADY_EXISTS.getMessage());
@@ -88,12 +91,19 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
         userDeletedEventOutputPort.publish(deletedUserId);
     }
 
-    private void applyCepAddress(Address address, CepAddress cepAddress) {
+    private void enrichAddress(Address address) {
+        CepAddress cepAddress = cepLookupOutputPort.findByCep(address.getCep())
+                .orElseThrow(() -> new ConflictException(ConstMessagesEnum.INVALID_CEP.getMessage()));
         address.setCep(cepAddress.getCep());
         address.setLogradouro(cepAddress.getLogradouro());
         address.setBairro(cepAddress.getBairro());
         address.setCidade(cepAddress.getCidade());
         address.setUf(cepAddress.getUf());
+
+        GeoCoordinates coordinates = geocodingOutputPort.geocode(address)
+                .orElseThrow(() -> new ConflictException(ConstMessagesEnum.INVALID_LOCATION.getMessage()));
+        address.setLatitude(coordinates.getLatitude());
+        address.setLongitude(coordinates.getLongitude());
     }
 
     private void assertSameUser(UUID authenticatedUserId, User existingUser) {

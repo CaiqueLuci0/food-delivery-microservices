@@ -1,5 +1,6 @@
 package food.delivery.user_ms.infra.adapters.inbound.web.presenter.dto.usercontroller.create;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public class AddressResponseDto {
@@ -13,6 +14,8 @@ public class AddressResponseDto {
     private String cidade;
     private String uf;
     private String referencia;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     public UUID getId() {
         return id;
@@ -84,5 +87,21 @@ public class AddressResponseDto {
 
     public void setReferencia(String referencia) {
         this.referencia = referencia;
+    }
+
+    public BigDecimal getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(BigDecimal latitude) {
+        this.latitude = latitude;
+    }
+
+    public BigDecimal getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(BigDecimal longitude) {
+        this.longitude = longitude;
     }
 }

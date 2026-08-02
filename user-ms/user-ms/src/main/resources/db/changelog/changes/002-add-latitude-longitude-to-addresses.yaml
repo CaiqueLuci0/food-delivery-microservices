@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-add-latitude-longitude-to-addresses
+      author: user-ms
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: addresses
+        - not:
+            - columnExists:
+                tableName: addresses
+                columnName: latitude
+      changes:
+        - addColumn:
+            tableName: addresses
+            columns:
+              - column:
+                  name: latitude
+                  type: decimal(10, 8)
+              - column:
+                  name: longitude
+                  type: decimal(11, 8)

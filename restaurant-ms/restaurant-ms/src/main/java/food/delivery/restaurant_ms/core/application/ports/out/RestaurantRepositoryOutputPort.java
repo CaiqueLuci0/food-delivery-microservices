@@ -2,6 +2,7 @@ package food.delivery.restaurant_ms.core.application.ports.out;
 
 import food.delivery.restaurant_ms.core.domain.entities.Restaurant;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +18,8 @@ public interface RestaurantRepositoryOutputPort {
     List<Restaurant> findAll();
 
     List<Restaurant> searchByNameOrDescription(String search);
+
+    List<Restaurant> findWithinRadius(BigDecimal latitude, BigDecimal longitude, double radiusMeters, String search);
 
     void delete(Restaurant restaurant);
 

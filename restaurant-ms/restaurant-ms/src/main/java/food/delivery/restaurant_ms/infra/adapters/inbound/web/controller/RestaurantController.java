@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,8 +46,14 @@ public class RestaurantController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RestaurantResponseDto>> findAll(@RequestParam(required = false) String search) {
-        return ResponseEntity.ok(RestaurantResponseMapper.toResponseList(restaurantCrudUseCase.findAll(search)));
+    public ResponseEntity<List<RestaurantResponseDto>> findAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) BigDecimal latitude,
+            @RequestParam(required = false) BigDecimal longitude
+    ) {
+        return ResponseEntity.ok(RestaurantResponseMapper.toResponseList(
+                restaurantCrudUseCase.findAll(search, latitude, longitude)
+        ));
     }
 
     @PutMapping("/{id}")

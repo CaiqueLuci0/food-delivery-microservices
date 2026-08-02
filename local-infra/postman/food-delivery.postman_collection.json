@@ -297,6 +297,33 @@
               }
             },
             {
+              "name": "Search Restaurants By Location",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/restaurant-ms/restaurants?latitude=-23.5505&longitude=-46.6333",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["restaurant-ms", "restaurants"],
+                  "query": [
+                    {
+                      "key": "latitude",
+                      "value": "-23.5505"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "-46.6333"
+                    }
+                  ]
+                }
+              }
+            },
+            {
               "name": "Get Restaurant By Id",
               "request": {
                 "method": "GET",

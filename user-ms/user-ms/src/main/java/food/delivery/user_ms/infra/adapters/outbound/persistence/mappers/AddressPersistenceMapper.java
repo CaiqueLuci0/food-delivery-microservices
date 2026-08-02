@@ -23,6 +23,8 @@ public final class AddressPersistenceMapper {
         jpaAddress.setCidade(address.getCidade());
         jpaAddress.setUf(address.getUf());
         jpaAddress.setReferencia(address.getReferencia());
+        jpaAddress.setLatitude(address.getLatitude());
+        jpaAddress.setLongitude(address.getLongitude());
         return jpaAddress;
     }
 
@@ -41,6 +43,8 @@ public final class AddressPersistenceMapper {
         address.setCidade(jpaAddress.getCidade());
         address.setUf(jpaAddress.getUf());
         address.setReferencia(jpaAddress.getReferencia());
+        address.setLatitude(jpaAddress.getLatitude());
+        address.setLongitude(jpaAddress.getLongitude());
         return address;
     }
 }

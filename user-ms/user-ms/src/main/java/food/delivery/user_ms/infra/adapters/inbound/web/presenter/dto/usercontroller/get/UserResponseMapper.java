@@ -38,6 +38,8 @@ public final class UserResponseMapper {
         dto.setCidade(address.getCidade());
         dto.setUf(address.getUf());
         dto.setReferencia(address.getReferencia());
+        dto.setLatitude(address.getLatitude());
+        dto.setLongitude(address.getLongitude());
         return dto;
     }
 }
