@@ -20,4 +20,8 @@ public class AuthFacade {
                 authenticateUseCase.login(request.getEmail(), request.getPassword())
         );
     }
+
+    public LoginResponseDto isLogged(String token) {
+        return LoginMapper.toResponse(authenticateUseCase.isLogged(token));
+    }
 }

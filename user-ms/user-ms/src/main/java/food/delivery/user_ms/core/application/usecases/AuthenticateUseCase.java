@@ -36,4 +36,19 @@ public class AuthenticateUseCase implements AuthenticateUseCaseInputPort {
 
         return new UserLoginDetails(tokenOutputPort.generate(user), user);
     }
+
+    @Override
+    public UserLoginDetails isLogged(String token) {
+        if (token == null || token.isBlank()) {
+            throw new UnauthorizedException(ConstMessagesEnum.INVALID_CREDENTIALS.getMessage());
+        }
+
+        var userId = tokenOutputPort.extractUserId(token.trim())
+                .orElseThrow(() -> new UnauthorizedException(ConstMessagesEnum.INVALID_CREDENTIALS.getMessage()));
+
+        User user = userRepositoryOutputPort.findById(userId)
+                .orElseThrow(() -> new UnauthorizedException(ConstMessagesEnum.INVALID_CREDENTIALS.getMessage()));
+
+        return new UserLoginDetails(token.trim(), user);
+    }
 }
