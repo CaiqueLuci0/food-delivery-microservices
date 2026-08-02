@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "food-delivery",
-    "description": "Collection unificada via gateway nginx (localhost:8080) para user-ms, restaurant-ms e catalog-ms",
+    "description": "Collection unificada via gateway nginx (localhost:8080) para user-ms, restaurant-ms, catalog-ms e order-ms",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -27,6 +27,10 @@
     },
     {
       "key": "specOptionId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
       "value": ""
     }
   ],
@@ -539,27 +543,25 @@
             {
               "name": "Resolve Product",
               "request": {
-                "method": "GET",
+                "method": "POST",
                 "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
                   {
                     "key": "Authorization",
                     "value": "Bearer {{token}}"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"specOptionIds\": [\"{{specOptionId}}\"]\n    }\n  ]\n}"
+                },
                 "url": {
-                  "raw": "{{baseUrl}}/catalog-ms/products/resolve?productId={{productId}}&specOptionIds={{specOptionId}}",
+                  "raw": "{{baseUrl}}/catalog-ms/products/resolve",
                   "host": ["{{baseUrl}}"],
-                  "path": ["catalog-ms", "products", "resolve"],
-                  "query": [
-                    {
-                      "key": "productId",
-                      "value": "{{productId}}"
-                    },
-                    {
-                      "key": "specOptionIds",
-                      "value": "{{specOptionId}}"
-                    }
-                  ]
+                  "path": ["catalog-ms", "products", "resolve"]
                 }
               }
             },
@@ -577,6 +579,198 @@
                   "raw": "{{baseUrl}}/catalog-ms/products/{{productId}}",
                   "host": ["{{baseUrl}}"],
                   "path": ["catalog-ms", "products", "{{productId}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Order MS",
+      "item": [
+        {
+          "name": "Orders",
+          "item": [
+            {
+              "name": "Create Order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('orderId', json.id);",
+                      "  }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"specOptionIds\": [\"{{specOptionId}}\"]\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders"]
+                }
+              }
+            },
+            {
+              "name": "Update Order Items",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"specOptionIds\": [\"{{specOptionId}}\"]\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders", "{{orderId}}"]
+                }
+              }
+            },
+            {
+              "name": "Finalize Order",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders/{{orderId}}/finalize",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders", "{{orderId}}", "finalize"]
+                }
+              }
+            },
+            {
+              "name": "Update Order Status",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"PREPARANDO\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders/{{orderId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders", "{{orderId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "Cancel Order",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders/{{orderId}}/cancel",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders", "{{orderId}}", "cancel"]
+                }
+              }
+            },
+            {
+              "name": "Get Order By Id",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders", "{{orderId}}"]
+                }
+              }
+            },
+            {
+              "name": "List My Orders",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders"]
+                }
+              }
+            },
+            {
+              "name": "List Orders By Restaurant",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/order-ms/orders?restaurantId={{restaurantId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["order-ms", "orders"],
+                  "query": [
+                    {
+                      "key": "restaurantId",
+                      "value": "{{restaurantId}}"
+                    }
+                  ]
                 }
               }
             }

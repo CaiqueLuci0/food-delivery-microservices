@@ -3,6 +3,7 @@ package food.delivery.catalog_ms.infra.adapters.inbound.web.controller;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.facade.ProductFacade;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.create.ProductCreateRequestDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.get.ProductResponseDto;
+import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.resolve.ProductResolveRequestDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.resolve.ProductResolveResponseDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.update.ProductUpdateRequestDto;
 import jakarta.validation.Valid;
@@ -44,12 +45,9 @@ public class ProductController {
         return ResponseEntity.ok(productFacade.findByRestaurant(restaurantId, search));
     }
 
-    @GetMapping("/resolve")
-    public ResponseEntity<ProductResolveResponseDto> resolve(
-            @RequestParam UUID productId,
-            @RequestParam(required = false) List<UUID> specOptionIds
-    ) {
-        return ResponseEntity.ok(productFacade.resolve(productId, specOptionIds));
+    @PostMapping("/resolve")
+    public ResponseEntity<ProductResolveResponseDto> resolve(@Valid @RequestBody ProductResolveRequestDto request) {
+        return ResponseEntity.ok(productFacade.resolve(request));
     }
 
     @GetMapping("/{id}")

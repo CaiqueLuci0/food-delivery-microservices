@@ -5,6 +5,7 @@ import food.delivery.catalog_ms.core.application.ports.out.ProductRepositoryOutp
 import food.delivery.catalog_ms.core.domain.entities.Product;
 import food.delivery.catalog_ms.core.domain.entities.SpecOption;
 import food.delivery.catalog_ms.core.domain.enums.ConstMessagesEnum;
+import food.delivery.catalog_ms.core.domain.exceptions.ConflictException;
 import food.delivery.catalog_ms.core.domain.exceptions.NotFoundException;
 
 import java.util.ArrayList;
@@ -22,7 +23,33 @@ public class ProductResolveUseCase implements ProductResolveUseCaseInputPort {
     }
 
     @Override
-    public ResolvedProduct resolve(UUID productId, List<UUID> specOptionIds) {
+    public ResolvedBatch resolve(List<ResolveItem> items) {
+        if (items == null || items.isEmpty()) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+
+        List<ResolvedProduct> resolvedItems = new ArrayList<>();
+        UUID restaurantId = null;
+        UUID ownerId = null;
+
+        for (ResolveItem item : items) {
+            if (item == null || item.productId() == null) {
+                throw new NotFoundException(ConstMessagesEnum.NOT_FOUND.getMessage());
+            }
+            ResolvedProduct resolved = resolveOne(item.productId(), item.specOptionIds());
+            if (restaurantId == null) {
+                restaurantId = resolved.product().getRestaurantId();
+                ownerId = resolved.product().getOwnerId();
+            } else if (!restaurantId.equals(resolved.product().getRestaurantId())) {
+                throw new ConflictException(ConstMessagesEnum.PRODUCTS_DIFFERENT_RESTAURANT.getMessage());
+            }
+            resolvedItems.add(resolved);
+        }
+
+        return new ResolvedBatch(restaurantId, ownerId, resolvedItems);
+    }
+
+    private ResolvedProduct resolveOne(UUID productId, List<UUID> specOptionIds) {
         Product product = productRepositoryOutputPort.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ConstMessagesEnum.NOT_FOUND.getMessage()));
 

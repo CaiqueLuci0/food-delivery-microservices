@@ -8,7 +8,8 @@ public enum ConstMessagesEnum {
     INTERNAL_ERROR("Erro interno do servidor"),
     INVALID_CREDENTIALS("Credenciais inválidas"),
     ACCESS_DENIED("Acesso negado"),
-    RESTAURANT_REFERENCE_NOT_FOUND("Referência de restaurante não encontrada");
+    RESTAURANT_REFERENCE_NOT_FOUND("Referência de restaurante não encontrada"),
+    PRODUCTS_DIFFERENT_RESTAURANT("Produtos pertencem a restaurantes diferentes");
 
     private final String messageBase;
 

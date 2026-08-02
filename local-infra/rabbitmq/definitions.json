@@ -93,6 +93,38 @@
       "arguments": {}
     },
     {
+      "name": "order-ms-user-created-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "user.created.dlx"
+      }
+    },
+    {
+      "name": "order-ms-user-deleted-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "user.deleted.dlx"
+      }
+    },
+    {
+      "name": "order-ms-user-created-dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "order-ms-user-deleted-dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
       "name": "restaurant-created",
       "vhost": "/",
       "durable": true,
@@ -101,6 +133,27 @@
     },
     {
       "name": "restaurant-deleted",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "order-created",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "payment-approved",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "payment-failed",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
@@ -125,6 +178,22 @@
       "arguments": {}
     },
     {
+      "source": "user.created",
+      "vhost": "/",
+      "destination": "order-ms-user-created-queue",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "user.deleted",
+      "vhost": "/",
+      "destination": "order-ms-user-deleted-queue",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
       "source": "user.created.dlx",
       "vhost": "/",
       "destination": "restaurant-ms-user-created-dlq",
@@ -136,6 +205,22 @@
       "source": "user.deleted.dlx",
       "vhost": "/",
       "destination": "restaurant-ms-user-deleted-dlq",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "user.created.dlx",
+      "vhost": "/",
+      "destination": "order-ms-user-created-dlq",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "user.deleted.dlx",
+      "vhost": "/",
+      "destination": "order-ms-user-deleted-dlq",
       "destination_type": "queue",
       "routing_key": "",
       "arguments": {}

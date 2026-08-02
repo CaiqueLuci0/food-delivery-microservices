@@ -5,25 +5,57 @@ import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.product
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ProductResolveResponseDto {
 
-    private ProductResponseDto product;
-    private List<SpecOptionResponseDto> specOptions = new ArrayList<>();
+    private UUID restaurantId;
+    private UUID ownerId;
+    private List<ResolvedItemResponseDto> items = new ArrayList<>();
 
-    public ProductResponseDto getProduct() {
-        return product;
+    public UUID getRestaurantId() {
+        return restaurantId;
     }
 
-    public void setProduct(ProductResponseDto product) {
-        this.product = product;
+    public void setRestaurantId(UUID restaurantId) {
+        this.restaurantId = restaurantId;
     }
 
-    public List<SpecOptionResponseDto> getSpecOptions() {
-        return specOptions;
+    public UUID getOwnerId() {
+        return ownerId;
     }
 
-    public void setSpecOptions(List<SpecOptionResponseDto> specOptions) {
-        this.specOptions = specOptions != null ? specOptions : new ArrayList<>();
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public List<ResolvedItemResponseDto> getItems() {
+        return items;
+    }
+
+    public void setItems(List<ResolvedItemResponseDto> items) {
+        this.items = items != null ? items : new ArrayList<>();
+    }
+
+    public static class ResolvedItemResponseDto {
+
+        private ProductResponseDto product;
+        private List<SpecOptionResponseDto> specOptions = new ArrayList<>();
+
+        public ProductResponseDto getProduct() {
+            return product;
+        }
+
+        public void setProduct(ProductResponseDto product) {
+            this.product = product;
+        }
+
+        public List<SpecOptionResponseDto> getSpecOptions() {
+            return specOptions;
+        }
+
+        public void setSpecOptions(List<SpecOptionResponseDto> specOptions) {
+            this.specOptions = specOptions != null ? specOptions : new ArrayList<>();
+        }
     }
 }

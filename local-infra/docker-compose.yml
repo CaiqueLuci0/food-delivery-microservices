@@ -29,6 +29,21 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-order:
+    image: postgres:16-alpine
+    container_name: order-ms-postgres
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: order_ms
+      POSTGRES_USER: usr
+      POSTGRES_PASSWORD: pwd
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usr -d order_ms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   mysql:
     image: mysql:8
     container_name: restaurant-ms-mysql
@@ -60,7 +75,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "rabbitmq-diagnostics -q ping && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-dlq && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-dlq && rabbitmqctl list_queues name | grep -q restaurant-created && rabbitmqctl list_queues name | grep -q restaurant-deleted && rabbitmqctl list_exchanges name | grep -q user.created && rabbitmqctl list_exchanges name | grep -q user.deleted"
+          "rabbitmq-diagnostics -q ping && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q restaurant-ms-user-created-dlq && rabbitmqctl list_queues name | grep -q restaurant-ms-user-deleted-dlq && rabbitmqctl list_queues name | grep -q order-ms-user-created-queue && rabbitmqctl list_queues name | grep -q order-ms-user-deleted-queue && rabbitmqctl list_queues name | grep -q order-created && rabbitmqctl list_queues name | grep -q payment-approved && rabbitmqctl list_queues name | grep -q payment-failed && rabbitmqctl list_queues name | grep -q restaurant-created && rabbitmqctl list_queues name | grep -q restaurant-deleted && rabbitmqctl list_exchanges name | grep -q user.created && rabbitmqctl list_exchanges name | grep -q user.deleted"
         ]
       interval: 10s
       timeout: 10s
@@ -135,6 +150,31 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  order-ms:
+    build:
+      context: ../order-ms/order-ms
+      dockerfile: Dockerfile
+    image: local-infra-order-ms:local
+    container_name: order-ms-app
+    ports:
+      - "8004:8004"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-order:5432/order_ms
+      SPRING_DATASOURCE_USERNAME: usr
+      SPRING_DATASOURCE_PASSWORD: pwd
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: usr
+      SPRING_RABBITMQ_PASSWORD: pwd
+      CATALOG_MS_BASE_URL: http://catalog-ms:8003/catalog-ms
+    depends_on:
+      postgres-order:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      catalog-ms:
+        condition: service_started
+
   nginx:
     image: nginx:alpine
     container_name: food-delivery-nginx
@@ -146,3 +186,44 @@ services:
       - user-ms
       - restaurant-ms
       - catalog-ms
+      - order-ms
+
+  seed:
+    image: alpine:3.20
+    container_name: food-delivery-seed
+    working_dir: /seed
+    volumes:
+      - ./seed:/seed:ro
+    environment:
+      BASE_URL: http://nginx
+      SEED_PASSWORD: senha123
+      MAX_WAIT_SEC: "300"
+      RETRY_SLEEP_SEC: "3"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        apk add --no-cache curl jq bash >/dev/null
+        exec bash /seed/seed.sh
+    depends_on:
+      postgres:
+        condition: service_healthy
+      postgres-catalog:
+        condition: service_healthy
+      postgres-order:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-ms:
+        condition: service_started
+      restaurant-ms:
+        condition: service_started
+      catalog-ms:
+        condition: service_started
+      order-ms:
+        condition: service_started
+      nginx:
+        condition: service_started
+    restart: "no"

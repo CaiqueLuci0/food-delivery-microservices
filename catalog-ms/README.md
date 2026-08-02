@@ -11,7 +11,7 @@
 | RF-07 | O sistema deve apagar restaurant_reference (e produtos em cascade no banco) ao consumir restaurant-deleted | Alta       | ✅       |
 
 ### Observações
-RF-06: O endpoint recebe um array de spec_option_id e um product_id e retorna o product e as spec_option requisitadas. Caso não encontre um dos ids listados (product ou spec), retorna 404.
+RF-06: O endpoint `POST /products/resolve` recebe `items: [{ productId, specOptionIds[] }]`, retorna os products e spec_options requisitadas com `restaurantId`/`ownerId` comuns. Caso não encontre um dos ids (product ou option), retorna 404. Caso os products pertençam a restaurantes diferentes, retorna 409.
 
 RF-07: Consumo da fila `restaurant-deleted` com payload `{ restaurantId }`. A exclusão da `restaurant_reference` dispara cascade no PostgreSQL para `product` → `specification` → `spec_option` (RNF-01).
 

@@ -8,8 +8,14 @@ import java.util.UUID;
 
 public interface ProductResolveUseCaseInputPort {
 
-    ResolvedProduct resolve(UUID productId, List<UUID> specOptionIds);
+    ResolvedBatch resolve(List<ResolveItem> items);
+
+    record ResolveItem(UUID productId, List<UUID> specOptionIds) {
+    }
 
     record ResolvedProduct(Product product, List<SpecOption> specOptions) {
+    }
+
+    record ResolvedBatch(UUID restaurantId, UUID ownerId, List<ResolvedProduct> items) {
     }
 }

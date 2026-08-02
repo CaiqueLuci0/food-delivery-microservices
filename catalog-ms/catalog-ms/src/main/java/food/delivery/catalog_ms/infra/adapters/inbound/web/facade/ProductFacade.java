@@ -7,6 +7,7 @@ import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.product
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.create.ProductCreateRequestDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.get.ProductResponseDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.get.ProductResponseMapper;
+import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.resolve.ProductResolveRequestDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.resolve.ProductResolveResponseDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.update.ProductUpdateMapper;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.update.ProductUpdateRequestDto;
@@ -46,16 +47,26 @@ public class ProductFacade {
         );
     }
 
-    public ProductResolveResponseDto resolve(UUID productId, List<UUID> specOptionIds) {
-        ProductResolveUseCaseInputPort.ResolvedProduct resolved = productResolveUseCase.resolve(
-                productId,
-                specOptionIds
-        );
+    public ProductResolveResponseDto resolve(ProductResolveRequestDto request) {
+        List<ProductResolveUseCaseInputPort.ResolveItem> items = request.getItems().stream()
+                .map(item -> new ProductResolveUseCaseInputPort.ResolveItem(
+                        item.getProductId(),
+                        item.getSpecOptionIds()
+                ))
+                .toList();
+        ProductResolveUseCaseInputPort.ResolvedBatch resolved = productResolveUseCase.resolve(items);
         ProductResolveResponseDto response = new ProductResolveResponseDto();
-        response.setProduct(ProductResponseMapper.toResponse(resolved.product()));
-        response.setSpecOptions(
-                resolved.specOptions().stream().map(ProductResponseMapper::toOptionResponse).toList()
-        );
+        response.setRestaurantId(resolved.restaurantId());
+        response.setOwnerId(resolved.ownerId());
+        response.setItems(resolved.items().stream().map(item -> {
+            ProductResolveResponseDto.ResolvedItemResponseDto dto =
+                    new ProductResolveResponseDto.ResolvedItemResponseDto();
+            dto.setProduct(ProductResponseMapper.toResponse(item.product()));
+            dto.setSpecOptions(
+                    item.specOptions().stream().map(ProductResponseMapper::toOptionResponse).toList()
+            );
+            return dto;
+        }).toList());
         return response;
     }
 
