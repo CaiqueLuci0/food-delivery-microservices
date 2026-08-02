@@ -24,12 +24,11 @@ RF-07: Consumo da fila `restaurant-deleted` com payload `{ restaurantId }`. A ex
 | RNF-03 | Banco de dados PostgreSQL                                                                                                                                            | Alta       | ✅       |
 | RNF-04 | Garantir que o sistema não faça nada quando receber uma mensagem que contenha um restaurante já registrado                                                           | Alta       | ✅       |
 | RNF-05 | Salvar imagens de produtos e especificações em um bucket S3                                                                                                          | Baixa      |          |
-| RNF-06 | O sistema deve disponibilizar endpoint para retornar informações de endereço de acordo com o CEP recebido                                                            | Média      |          |
-| RNF-07 | Código em arquitetura hexagonal                                                                                                                                      | Alta       | ✅       |
-| RNF-08 | Ao iniciar o springboot, o sistema deve rodar as migrations liquibase                                                                                                | Alta       | ✅       |
-| RNF-09 | Todas as rotinas que alteram dados de produtos precisam garantir (via id de usuario no JWT) que o usuário logado é o dono do restaurante (representado por owner_id) | Alta       | ✅       |
-| RNF-10 | O sistema não deve gerar tokens JWT, apenas decodifica-los utilizando a secret padrão para todos os ms                                                               | Alta       | ✅       |
-| RNF-11 | Migrations Liquibase em XML                                                                                                                                          | Alta       | ✅       |
+| RNF-06 | Código em arquitetura hexagonal                                                                                                                                      | Alta       | ✅       |
+| RNF-07 | Ao iniciar o springboot, o sistema deve rodar as migrations liquibase                                                                                                | Alta       | ✅       |
+| RNF-08 | Todas as rotinas que alteram dados de produtos precisam garantir (via id de usuario no JWT) que o usuário logado é o dono do restaurante (representado por owner_id) | Alta       | ✅       |
+| RNF-09 | O sistema não deve gerar tokens JWT, apenas decodifica-los utilizando a secret padrão para todos os ms                                                               | Alta       | ✅       |
+| RNF-10 | Migrations Liquibase em XML                                                                                                                                          | Alta       | ✅       |
 
 ## DER PostgreSQL
 
