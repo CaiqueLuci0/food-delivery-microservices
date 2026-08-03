@@ -1,3 +1,39 @@
+## Tecnologias
+
+| Tecnologia | Uso |
+|------------|-----|
+| Java 17 | Runtime |
+| Spring Boot | Framework HTTP, Security, AMQP, WebSocket |
+| Spring Security + JWT (JJWT) | Validação de token (não emite JWT) |
+| Spring Data JPA | Persistência |
+| PostgreSQL | Banco de dados |
+| Liquibase (XML) | Migrations |
+| RabbitMQ (AMQP) | Consome usuários/pagamentos; publica `order-created` / `order-deleted` |
+| WebSocket / STOMP | Push de status do pedido em tempo real |
+| Arquitetura hexagonal | Ports & adapters |
+
+## Endpoints
+
+Paths via Nginx (`http://localhost:8080`).
+
+| Método | Path | Função |
+|--------|------|--------|
+| POST | `/order-ms/orders` | Cria pedido (`EM_CADASTRAMENTO`) |
+| PUT | `/order-ms/orders/{id}` | Atualiza itens (só em cadastramento) |
+| PATCH | `/order-ms/orders/{id}/finalize` | Finaliza → `AGUARDANDO_PAGAMENTO` e publica `order-created` |
+| PUT | `/order-ms/orders/{id}/status` | Atualiza status (dono do restaurante) |
+| POST | `/order-ms/orders/{id}/cancel` | Cancela pedido (cliente ou dono, conforme regra) |
+| GET | `/order-ms/orders/{id}` | Busca pedido por id |
+| GET | `/order-ms/orders` | Lista pedidos do cliente ou do restaurante (`?restaurantId=`) |
+
+### WebSocket (STOMP)
+
+| Item | Detalhe |
+|------|---------|
+| Handshake | `/order-ms/ws` |
+| Tópico de push | `/topic/orders/{orderId}` |
+| Auth | JWT no CONNECT STOMP |
+
 ## Requisitos Funcionais
 
 | ID    | Descrição                                                                                                                                                                                                                                | Prioridade | Entregue |
@@ -11,7 +47,7 @@
 | RF-08 | O sistema deve disponibilizar um endpoint para atualizar o status do pedido acessível apenas para o dono do restaurante. Isso muda o status entre `AGUARDANDO_RESTAURANTE`, `PREPARANDO`, `SAIU_PARA_ENTREGA`, `ENTREGADOR_NO_LOCAL` e `ENTREGUE`   | Alta       | ✅       |
 | RF-09 | order creation -> receive products ids and spec_options array of ids, retrieve data from catalog-ms(http), recebe o product e as spec_option requisitadas, stores order data from product and restaurant retrieved from the http request | Alta       | ✅       |
 | RF-10 | O usuário pode avaliar um pedido com status ENTREGUE                                                                                                                                                                                     | Média      |          |
-| RF-11 | O sistema deve disponibilizar um endpoint para o cliente acompanhar o status do pedido em tempo real                                                                                                                                     | Média      |          |
+| RF-11 | O sistema deve disponibilizar um endpoint para o cliente acompanhar o status do pedido em tempo real                                                                                                                                     | Média      | ✅       |
 
 ### Observações
 - Status do pedido (RF-02):

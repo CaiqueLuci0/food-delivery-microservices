@@ -1,3 +1,32 @@
+## Tecnologias
+
+| Tecnologia | Uso |
+|------------|-----|
+| Java 17 | Runtime |
+| Spring Boot | Framework HTTP, Security, AMQP |
+| Spring Security + JWT (JJWT) | Validação de token (não emite JWT) |
+| Spring Data JPA | Persistência |
+| PostgreSQL | Banco de dados |
+| Liquibase (XML) | Migrations |
+| RabbitMQ (AMQP) | Consome `restaurant-created` / `restaurant-deleted` |
+| AWS SDK S3 | Upload/remoção de foto do produto (LocalStack em local) |
+| Arquitetura hexagonal | Ports & adapters |
+
+## Endpoints
+
+Paths via Nginx (`http://localhost:8080`).
+
+| Método | Path | Função |
+|--------|------|--------|
+| POST | `/catalog-ms/products` | Cria produto do restaurante do owner autenticado |
+| GET | `/catalog-ms/products` | Lista produtos por `restaurantId` (opcional `search`) |
+| GET | `/catalog-ms/products/{id}` | Busca produto por id |
+| PUT | `/catalog-ms/products/{id}` | Atualiza produto (dono) |
+| PUT | `/catalog-ms/products/{id}/image` | Upload multipart da foto do produto (S3) |
+| DELETE | `/catalog-ms/products/{id}/image` | Remove foto do produto (S3 + `imageKey`) |
+| POST | `/catalog-ms/products/resolve` | Resolve produtos/opções para montagem de pedido |
+| DELETE | `/catalog-ms/products/{id}` | Exclui produto (dono) |
+
 ## Requisitos Funcionais
 
 | ID    | Descrição                                                                                                  | Prioridade | Entregue |
@@ -23,7 +52,7 @@ RF-07: Consumo da fila `restaurant-deleted` com payload `{ restaurantId }`. A ex
 | RNF-02 | Utilizar mescla dos padrões de cache "write through" e "lazy loading" com Redis                                                                                      | Baixa      |          |
 | RNF-03 | Banco de dados PostgreSQL                                                                                                                                            | Alta       | ✅       |
 | RNF-04 | Garantir que o sistema não faça nada quando receber uma mensagem que contenha um restaurante já registrado                                                           | Alta       | ✅       |
-| RNF-05 | Salvar imagens de produtos e especificações em um bucket S3                                                                                                          | Baixa      |          |
+| RNF-05 | Salvar imagens de produtos e especificações em um bucket S3                                                                                                          | Baixa      | ✅       |
 | RNF-06 | Código em arquitetura hexagonal                                                                                                                                      | Alta       | ✅       |
 | RNF-07 | Ao iniciar o springboot, o sistema deve rodar as migrations liquibase                                                                                                | Alta       | ✅       |
 | RNF-08 | Todas as rotinas que alteram dados de produtos precisam garantir (via id de usuario no JWT) que o usuário logado é o dono do restaurante (representado por owner_id) | Alta       | ✅       |

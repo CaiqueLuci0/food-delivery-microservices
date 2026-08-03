@@ -1,3 +1,24 @@
+## Tecnologias
+
+| Tecnologia | Uso |
+|------------|-----|
+| Java 17 | Runtime |
+| Spring Boot | Framework HTTP, Security, AMQP |
+| Spring Security + JWT (JJWT) | Validação de token (não emite JWT) |
+| Spring Data MongoDB | Persistência |
+| MongoDB | Banco de dados |
+| Mongock | Migrations |
+| RabbitMQ (AMQP) | Consome `order-created` / `order-deleted`; publica `payment-approved` / `payment-failed` |
+| Arquitetura hexagonal | Ports & adapters |
+
+## Endpoints
+
+Paths via Nginx (`http://localhost:8080`).
+
+| Método | Path | Função |
+|--------|------|--------|
+| PATCH | `/payment-ms/payments/{orderId}/pay` | Marca pagamento como `PAGO` e publica `payment-approved` |
+
 ## Requisitos Funcionais
 
 | ID    | Descrição                                                                                                                                                         | Prioridade | Entregue |
