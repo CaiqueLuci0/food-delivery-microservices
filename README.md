@@ -76,7 +76,7 @@ Na pasta `local-infra`:
 cd local-infra
 docker compose up -d --build && docker compose logs -f seed
 ```
-Quando o log do seed indicar conclusão (o container `food-delivery-seed` encerra), abra:
+É comum demorar de 10 - 15 minutos para subir o ambiente pela primeira vez. Quando o log do seed indicar conclusão (o container `food-delivery-seed` encerra), abra:
 
 | URL | Uso |
 |-----|-----|
