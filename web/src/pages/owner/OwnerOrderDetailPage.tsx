@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/feedback/ConfirmDialog'
 import { ErrorState, PageLoader } from '@/components/feedback/States'
 import { useOwnerRestaurant } from '@/contexts/OwnerRestaurantContext'
 import { useSnackbar } from '@/contexts/SnackbarContext'
+import { useOrderStatusSocket } from '@/hooks/useOrderStatusSocket'
 import { orderService } from '@/services/orderService'
 import {
   ORDER_STATUS_LABEL,
@@ -33,11 +34,12 @@ export function OwnerOrderDetailPage() {
   const [status, setStatus] = useState<OrderStatus>('PREPARANDO')
   const [cancelOpen, setCancelOpen] = useState(false)
 
+  useOrderStatusSocket(id)
+
   const query = useQuery({
     queryKey: ['order', id],
     enabled: Boolean(id),
     queryFn: () => orderService.getById(id),
-    refetchInterval: 4000,
   })
 
   const statusMutation = useMutation({

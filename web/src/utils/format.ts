@@ -14,6 +14,7 @@ export function orderTotal(order: {
 export const ORDER_STATUS_LABEL: Record<string, string> = {
   EM_CADASTRAMENTO: 'Em cadastramento',
   AGUARDANDO_PAGAMENTO: 'Aguardando pagamento',
+  AGUARDANDO_RESTAURANTE: 'Aguardando restaurante',
   PREPARANDO: 'Preparando',
   SAIU_PARA_ENTREGA: 'Saiu para entrega',
   ENTREGADOR_NO_LOCAL: 'Entregador no local',
@@ -22,6 +23,7 @@ export const ORDER_STATUS_LABEL: Record<string, string> = {
 }
 
 export const OWNER_ORDER_STATUSES = [
+  'AGUARDANDO_RESTAURANTE',
   'PREPARANDO',
   'SAIU_PARA_ENTREGA',
   'ENTREGADOR_NO_LOCAL',

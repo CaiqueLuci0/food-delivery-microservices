@@ -1,13 +1,18 @@
 import { z } from 'zod'
+import { cepDigits } from '@/utils/masks'
 
 export const addressSchema = z.object({
-  cep: z.string().min(8, 'CEP inválido'),
+  cep: z
+    .string()
+    .refine((value) => cepDigits(value).length === 8, 'CEP inválido'),
   logradouro: z.string().min(1, 'Obrigatório'),
   numero: z.string().min(1, 'Obrigatório'),
   complemento: z.string().optional().nullable(),
   bairro: z.string().min(1, 'Obrigatório'),
   cidade: z.string().min(1, 'Obrigatório'),
-  uf: z.string().min(2, 'UF inválida').max(2),
+  uf: z
+    .string()
+    .regex(/^[A-Z]{2}$/, 'UF inválida'),
   referencia: z.string().optional().nullable(),
 })
 

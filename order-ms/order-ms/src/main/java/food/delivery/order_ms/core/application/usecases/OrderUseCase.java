@@ -5,6 +5,7 @@ import food.delivery.order_ms.core.application.ports.out.CatalogResolveOutputPor
 import food.delivery.order_ms.core.application.ports.out.OrderCreatedEventOutputPort;
 import food.delivery.order_ms.core.application.ports.out.OrderDeletedEventOutputPort;
 import food.delivery.order_ms.core.application.ports.out.OrderRepositoryOutputPort;
+import food.delivery.order_ms.core.application.ports.out.OrderStatusPushOutputPort;
 import food.delivery.order_ms.core.application.ports.out.UserReferenceRepositoryOutputPort;
 import food.delivery.order_ms.core.domain.entities.CatalogResolution;
 import food.delivery.order_ms.core.domain.entities.Order;
@@ -28,6 +29,7 @@ public class OrderUseCase implements OrderUseCaseInputPort {
     );
 
     private static final Set<OrderStatus> OWNER_CANCELABLE = EnumSet.of(
+            OrderStatus.AGUARDANDO_RESTAURANTE,
             OrderStatus.PREPARANDO,
             OrderStatus.SAIU_PARA_ENTREGA,
             OrderStatus.ENTREGADOR_NO_LOCAL,
@@ -35,6 +37,7 @@ public class OrderUseCase implements OrderUseCaseInputPort {
     );
 
     private static final Set<OrderStatus> OWNER_UPDATABLE = EnumSet.of(
+            OrderStatus.AGUARDANDO_RESTAURANTE,
             OrderStatus.PREPARANDO,
             OrderStatus.SAIU_PARA_ENTREGA,
             OrderStatus.ENTREGADOR_NO_LOCAL,
@@ -46,19 +49,22 @@ public class OrderUseCase implements OrderUseCaseInputPort {
     private final CatalogResolveOutputPort catalogResolveOutputPort;
     private final OrderCreatedEventOutputPort orderCreatedEventOutputPort;
     private final OrderDeletedEventOutputPort orderDeletedEventOutputPort;
+    private final OrderStatusPushOutputPort orderStatusPushOutputPort;
 
     public OrderUseCase(
             OrderRepositoryOutputPort orderRepositoryOutputPort,
             UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort,
             CatalogResolveOutputPort catalogResolveOutputPort,
             OrderCreatedEventOutputPort orderCreatedEventOutputPort,
-            OrderDeletedEventOutputPort orderDeletedEventOutputPort
+            OrderDeletedEventOutputPort orderDeletedEventOutputPort,
+            OrderStatusPushOutputPort orderStatusPushOutputPort
     ) {
         this.orderRepositoryOutputPort = orderRepositoryOutputPort;
         this.userReferenceRepositoryOutputPort = userReferenceRepositoryOutputPort;
         this.catalogResolveOutputPort = catalogResolveOutputPort;
         this.orderCreatedEventOutputPort = orderCreatedEventOutputPort;
         this.orderDeletedEventOutputPort = orderDeletedEventOutputPort;
+        this.orderStatusPushOutputPort = orderStatusPushOutputPort;
     }
 
     @Override
@@ -105,6 +111,7 @@ public class OrderUseCase implements OrderUseCaseInputPort {
                 "AGUARDANDO",
                 price
         );
+        orderStatusPushOutputPort.push(saved);
         return saved;
     }
 
@@ -120,7 +127,9 @@ public class OrderUseCase implements OrderUseCaseInputPort {
         }
 
         order.setStatus(status);
-        return orderRepositoryOutputPort.save(order);
+        Order saved = orderRepositoryOutputPort.save(order);
+        orderStatusPushOutputPort.push(saved);
+        return saved;
     }
 
     @Override
@@ -133,12 +142,14 @@ public class OrderUseCase implements OrderUseCaseInputPort {
             order.setStatus(OrderStatus.CANCELADO);
             Order saved = orderRepositoryOutputPort.save(order);
             orderDeletedEventOutputPort.publish(saved.getId());
+            orderStatusPushOutputPort.push(saved);
             return saved;
         }
         if (isOwner && OWNER_CANCELABLE.contains(order.getStatus())) {
             order.setStatus(OrderStatus.CANCELADO);
             Order saved = orderRepositoryOutputPort.save(order);
             orderDeletedEventOutputPort.publish(saved.getId());
+            orderStatusPushOutputPort.push(saved);
             return saved;
         }
         if (!isClient && !isOwner) {

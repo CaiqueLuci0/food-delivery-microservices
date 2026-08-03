@@ -111,6 +111,7 @@ export type ProductWriteRequest = {
 export type OrderStatus =
   | 'EM_CADASTRAMENTO'
   | 'AGUARDANDO_PAGAMENTO'
+  | 'AGUARDANDO_RESTAURANTE'
   | 'PREPARANDO'
   | 'SAIU_PARA_ENTREGA'
   | 'ENTREGADOR_NO_LOCAL'

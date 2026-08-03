@@ -80,8 +80,12 @@ export function RegisterPage() {
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
+                  value={String(field.value ?? '').toLowerCase()}
+                  onChange={(event) => field.onChange(event.target.value.toLowerCase().trimStart())}
                   label="E-mail"
                   type="email"
+                  autoComplete="email"
+                  inputProps={{ inputMode: 'email' }}
                   error={Boolean(fieldState.error)}
                   helperText={fieldState.error?.message}
                   fullWidth
@@ -96,6 +100,7 @@ export function RegisterPage() {
                   {...field}
                   label="Senha"
                   type="password"
+                  autoComplete="new-password"
                   error={Boolean(fieldState.error)}
                   helperText={fieldState.error?.message}
                   fullWidth

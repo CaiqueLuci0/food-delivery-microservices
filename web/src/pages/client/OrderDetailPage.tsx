@@ -13,12 +13,10 @@ import { getErrorMessage } from '@/api/httpClient'
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog'
 import { ErrorState, PageLoader } from '@/components/feedback/States'
 import { useSnackbar } from '@/contexts/SnackbarContext'
+import { useOrderStatusSocket } from '@/hooks/useOrderStatusSocket'
 import { orderService } from '@/services/orderService'
 import { paymentService } from '@/services/paymentService'
 import { ORDER_STATUS_LABEL, formatCurrency, orderTotal } from '@/utils/format'
-import type { OrderStatus } from '@/types/api'
-
-const TERMINAL: OrderStatus[] = ['ENTREGUE', 'CANCELADO']
 
 export function OrderDetailPage() {
   const { id = '' } = useParams()
@@ -27,15 +25,12 @@ export function OrderDetailPage() {
   const navigate = useNavigate()
   const [cancelOpen, setCancelOpen] = useState(false)
 
+  useOrderStatusSocket(id)
+
   const query = useQuery({
     queryKey: ['order', id],
     enabled: Boolean(id),
     queryFn: () => orderService.getById(id),
-    refetchInterval: (q) => {
-      const status = q.state.data?.status
-      if (!status || TERMINAL.includes(status)) return false
-      return 4000
-    },
   })
 
   const payMutation = useMutation({

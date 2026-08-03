@@ -5,6 +5,7 @@ import food.delivery.order_ms.core.application.ports.out.CatalogResolveOutputPor
 import food.delivery.order_ms.core.application.ports.out.OrderCreatedEventOutputPort;
 import food.delivery.order_ms.core.application.ports.out.OrderDeletedEventOutputPort;
 import food.delivery.order_ms.core.application.ports.out.OrderRepositoryOutputPort;
+import food.delivery.order_ms.core.application.ports.out.OrderStatusPushOutputPort;
 import food.delivery.order_ms.core.application.ports.out.UserReferenceRepositoryOutputPort;
 import food.delivery.order_ms.core.application.usecases.OrderUseCase;
 import org.springframework.context.annotation.Bean;
@@ -19,14 +20,16 @@ public class OrderUseCaseConfig {
             UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort,
             CatalogResolveOutputPort catalogResolveOutputPort,
             OrderCreatedEventOutputPort orderCreatedEventOutputPort,
-            OrderDeletedEventOutputPort orderDeletedEventOutputPort
+            OrderDeletedEventOutputPort orderDeletedEventOutputPort,
+            OrderStatusPushOutputPort orderStatusPushOutputPort
     ) {
         return new OrderUseCase(
                 orderRepositoryOutputPort,
                 userReferenceRepositoryOutputPort,
                 catalogResolveOutputPort,
                 orderCreatedEventOutputPort,
-                orderDeletedEventOutputPort
+                orderDeletedEventOutputPort,
+                orderStatusPushOutputPort
         );
     }
 }

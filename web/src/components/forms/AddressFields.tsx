@@ -1,6 +1,7 @@
 import { Stack, TextField } from '@mui/material'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { Controller } from 'react-hook-form'
+import { formatAddressNumber, formatCep, formatUf } from '@/utils/masks'
 
 type AddressFieldsProps<T extends FieldValues> = {
   control: Control<T>
@@ -18,7 +19,11 @@ export function AddressFields<T extends FieldValues>({ control, prefix }: Addres
         render={({ field: f, fieldState }) => (
           <TextField
             {...f}
+            value={formatCep(String(f.value ?? ''))}
+            onChange={(event) => f.onChange(formatCep(event.target.value))}
             label="CEP"
+            placeholder="00000-000"
+            inputProps={{ inputMode: 'numeric', maxLength: 9 }}
             error={Boolean(fieldState.error)}
             helperText={fieldState.error?.message}
             fullWidth
@@ -45,7 +50,11 @@ export function AddressFields<T extends FieldValues>({ control, prefix }: Addres
           render={({ field: f, fieldState }) => (
             <TextField
               {...f}
+              value={formatAddressNumber(String(f.value ?? ''))}
+              onChange={(event) => f.onChange(formatAddressNumber(event.target.value))}
               label="Número"
+              placeholder="123 ou S/N"
+              inputProps={{ maxLength: 12 }}
               error={Boolean(fieldState.error)}
               helperText={fieldState.error?.message}
               fullWidth
@@ -91,9 +100,14 @@ export function AddressFields<T extends FieldValues>({ control, prefix }: Addres
           render={({ field: f, fieldState }) => (
             <TextField
               {...f}
+              value={formatUf(String(f.value ?? ''))}
+              onChange={(event) => f.onChange(formatUf(event.target.value))}
               label="UF"
+              placeholder="SP"
+              inputProps={{ maxLength: 2, style: { textTransform: 'uppercase' } }}
               error={Boolean(fieldState.error)}
               helperText={fieldState.error?.message}
+              sx={{ maxWidth: { sm: 120 } }}
               fullWidth
             />
           )}
