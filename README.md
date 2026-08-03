@@ -1,6 +1,8 @@
 # food-delivery-microservices
 
 Desafio para uma vaga em uma empresa de delivery.
+<img width="975" height="500" alt="image" src="https://github.com/user-attachments/assets/6f911f65-adbb-475b-8a3f-5be803d99e38" />
+
 
 ## Enunciado:
 
@@ -109,7 +111,8 @@ A solução foi desenhada como **microserviços** para garantir **alta disponibi
 
 ### Diagrama C4 (Container)
 
-![C4 Container](./docs/c4-container.png)
+<img width="2252" height="2632" alt="c4" src="https://github.com/user-attachments/assets/c0857320-86a1-43c7-83a2-a05b8bce387d" />
+
 
 ## Documentações por microserviço
 
