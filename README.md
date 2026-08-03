@@ -74,17 +74,8 @@ Na pasta `local-infra`:
 
 ```bash
 cd local-infra
-docker compose up -d --build
+docker compose up -d --build && docker compose logs -f seed
 ```
-
-Aguarde **alguns minutos** após o compose subir: os microserviços precisam ficar healthy e o serviço **`seed`** popula usuários, restaurantes, produtos e imagens. Só então o ambiente estará pronto para uso.
-
-Acompanhar o seed:
-
-```bash
-docker compose logs -f seed
-```
-
 Quando o log do seed indicar conclusão (o container `food-delivery-seed` encerra), abra:
 
 | URL | Uso |
