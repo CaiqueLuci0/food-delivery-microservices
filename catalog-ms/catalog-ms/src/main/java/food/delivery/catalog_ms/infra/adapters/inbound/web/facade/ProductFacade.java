@@ -2,7 +2,10 @@ package food.delivery.catalog_ms.infra.adapters.inbound.web.facade;
 
 import food.delivery.catalog_ms.core.application.ports.in.ProductCrudUseCaseInputPort;
 import food.delivery.catalog_ms.core.application.ports.in.ProductResolveUseCaseInputPort;
+import food.delivery.catalog_ms.core.application.ports.out.ObjectStorageOutputPort;
 import food.delivery.catalog_ms.core.domain.entities.Product;
+import food.delivery.catalog_ms.core.domain.enums.ConstMessagesEnum;
+import food.delivery.catalog_ms.core.domain.exceptions.ConflictException;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.create.ProductCreateMapper;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.create.ProductCreateRequestDto;
 import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.productcontroller.get.ProductResponseDto;
@@ -14,7 +17,9 @@ import food.delivery.catalog_ms.infra.adapters.inbound.web.presenter.dto.product
 import food.delivery.catalog_ms.infra.adapters.inbound.web.security.AuthenticatedUser;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,13 +28,16 @@ public class ProductFacade {
 
     private final ProductCrudUseCaseInputPort productCrudUseCase;
     private final ProductResolveUseCaseInputPort productResolveUseCase;
+    private final ObjectStorageOutputPort objectStorageOutputPort;
 
     public ProductFacade(
             ProductCrudUseCaseInputPort productCrudUseCase,
-            ProductResolveUseCaseInputPort productResolveUseCase
+            ProductResolveUseCaseInputPort productResolveUseCase,
+            ObjectStorageOutputPort objectStorageOutputPort
     ) {
         this.productCrudUseCase = productCrudUseCase;
         this.productResolveUseCase = productResolveUseCase;
+        this.objectStorageOutputPort = objectStorageOutputPort;
     }
 
     @Transactional
@@ -38,13 +46,13 @@ public class ProductFacade {
                 AuthenticatedUser.requireId(),
                 ProductCreateMapper.toProduct(request)
         );
-        return ProductResponseMapper.toResponse(created);
+        return toResponse(created);
     }
 
     public List<ProductResponseDto> findByRestaurant(UUID restaurantId, String search) {
-        return ProductResponseMapper.toResponseList(
-                productCrudUseCase.findByRestaurantId(restaurantId, search)
-        );
+        return productCrudUseCase.findByRestaurantId(restaurantId, search).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public ProductResolveResponseDto resolve(ProductResolveRequestDto request) {
@@ -61,7 +69,7 @@ public class ProductFacade {
         response.setItems(resolved.items().stream().map(item -> {
             ProductResolveResponseDto.ResolvedItemResponseDto dto =
                     new ProductResolveResponseDto.ResolvedItemResponseDto();
-            dto.setProduct(ProductResponseMapper.toResponse(item.product()));
+            dto.setProduct(toResponse(item.product()));
             dto.setSpecOptions(
                     item.specOptions().stream().map(ProductResponseMapper::toOptionResponse).toList()
             );
@@ -71,7 +79,7 @@ public class ProductFacade {
     }
 
     public ProductResponseDto findById(UUID id) {
-        return ProductResponseMapper.toResponse(productCrudUseCase.findById(id));
+        return toResponse(productCrudUseCase.findById(id));
     }
 
     @Transactional
@@ -82,11 +90,43 @@ public class ProductFacade {
                 ProductUpdateMapper.toProduct(request),
                 request.isSpecificationsPresent()
         );
-        return ProductResponseMapper.toResponse(updated);
+        return toResponse(updated);
+    }
+
+    @Transactional
+    public ProductResponseDto uploadImage(UUID id, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+        try {
+            Product updated = productCrudUseCase.uploadImage(
+                    AuthenticatedUser.requireId(),
+                    id,
+                    file.getInputStream(),
+                    file.getSize(),
+                    file.getContentType()
+            );
+            return toResponse(updated);
+        } catch (IOException e) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+    }
+
+    @Transactional
+    public ProductResponseDto deleteImage(UUID id) {
+        return toResponse(productCrudUseCase.deleteImage(AuthenticatedUser.requireId(), id));
     }
 
     @Transactional
     public void delete(UUID id) {
         productCrudUseCase.delete(AuthenticatedUser.requireId(), id);
+    }
+
+    private ProductResponseDto toResponse(Product product) {
+        ProductResponseDto dto = ProductResponseMapper.toResponse(product);
+        if (dto != null) {
+            dto.setImageUrl(objectStorageOutputPort.publicUrl(product.getImageKey()));
+        }
+        return dto;
     }
 }

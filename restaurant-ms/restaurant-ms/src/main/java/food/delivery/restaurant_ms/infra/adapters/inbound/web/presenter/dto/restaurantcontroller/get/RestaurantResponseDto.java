@@ -8,6 +8,8 @@ public class RestaurantResponseDto {
     private String name;
     private String description;
     private UUID ownerId;
+    private String imageKey;
+    private String imageUrl;
     private AddressResponseDto address;
 
     public UUID getId() {
@@ -40,6 +42,22 @@ public class RestaurantResponseDto {
 
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public AddressResponseDto getAddress() {

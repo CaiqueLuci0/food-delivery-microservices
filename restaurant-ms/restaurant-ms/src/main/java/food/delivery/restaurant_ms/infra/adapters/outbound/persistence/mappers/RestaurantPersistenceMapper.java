@@ -19,6 +19,7 @@ public final class RestaurantPersistenceMapper {
         jpaRestaurant.setName(restaurant.getName());
         jpaRestaurant.setDescription(restaurant.getDescription());
         jpaRestaurant.setOwnerId(restaurant.getOwnerId());
+        jpaRestaurant.setImageKey(restaurant.getImageKey());
         if (restaurant.getAddress() != null) {
             JpaAddress jpaAddress = AddressPersistenceMapper.toJpa(restaurant.getAddress());
             jpaRestaurant.setAddress(jpaAddress);
@@ -35,6 +36,7 @@ public final class RestaurantPersistenceMapper {
         restaurant.setName(jpaRestaurant.getName());
         restaurant.setDescription(jpaRestaurant.getDescription());
         restaurant.setOwnerId(jpaRestaurant.getOwnerId());
+        restaurant.setImageKey(jpaRestaurant.getImageKey());
         Address address = AddressPersistenceMapper.toDomain(jpaRestaurant.getAddress());
         if (address != null) {
             address.setRestaurant(restaurant);

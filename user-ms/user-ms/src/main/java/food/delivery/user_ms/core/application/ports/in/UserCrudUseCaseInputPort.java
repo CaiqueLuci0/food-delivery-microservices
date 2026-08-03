@@ -10,6 +10,6 @@ public interface UserCrudUseCaseInputPort {
     User findById(UUID id);
     List<User> findAll();
     User create(User user, Address address);
-    User update(UUID authenticatedUserId, UUID userid, User user);
+    User update(UUID authenticatedUserId, UUID userid, User user, Address address);
     void delete(UUID authenticatedUserId, UUID userid);
 }

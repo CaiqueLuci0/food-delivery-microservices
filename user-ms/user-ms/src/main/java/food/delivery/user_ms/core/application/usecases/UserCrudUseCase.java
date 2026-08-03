@@ -75,10 +75,31 @@ public class UserCrudUseCase implements UserCrudUseCaseInputPort {
     }
 
     @Override
-    public User update(UUID authenticatedUserId, UUID userid, User user) {
+    public User update(UUID authenticatedUserId, UUID userid, User user, Address address) {
         User existingUser = this.findById(userid);
         assertSameUser(authenticatedUserId, existingUser);
         existingUser.setName(user.getName());
+
+        if (address != null) {
+            enrichAddress(address);
+            Address existingAddress = existingUser.getAddress();
+            if (existingAddress == null) {
+                existingUser.setAddress(address);
+                address.setUser(existingUser);
+            } else {
+                existingAddress.setCep(address.getCep());
+                existingAddress.setLogradouro(address.getLogradouro());
+                existingAddress.setNumero(address.getNumero());
+                existingAddress.setComplemento(address.getComplemento());
+                existingAddress.setBairro(address.getBairro());
+                existingAddress.setCidade(address.getCidade());
+                existingAddress.setUf(address.getUf());
+                existingAddress.setReferencia(address.getReferencia());
+                existingAddress.setLatitude(address.getLatitude());
+                existingAddress.setLongitude(address.getLongitude());
+            }
+        }
+
         return this.userRepositoryOutputPort.save(existingUser);
     }
 

@@ -15,15 +15,31 @@ import { z } from 'zod'
 import { getErrorMessage } from '@/api/httpClient'
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog'
 import { ErrorState, PageLoader } from '@/components/feedback/States'
+import { AddressFields } from '@/components/forms/AddressFields'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSnackbar } from '@/contexts/SnackbarContext'
 import { userService } from '@/services/userService'
+import { addressSchema } from '@/utils/schemas'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Nome muito curto'),
+  address: addressSchema,
 })
 
 type FormValues = z.infer<typeof profileSchema>
+
+function emptyAddress(): FormValues['address'] {
+  return {
+    cep: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    uf: '',
+    referencia: '',
+  }
+}
 
 export function ProfilePage() {
   const { user, updateUser, logout } = useAuth()
@@ -38,9 +54,26 @@ export function ProfilePage() {
     queryFn: () => userService.getById(user!.id),
   })
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const profile = query.data
+  const address = profile?.address
+
+  const { control, setValue, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(profileSchema),
-    values: { name: query.data?.name ?? user?.name ?? '' },
+    values: {
+      name: profile?.name ?? user?.name ?? '',
+      address: address
+        ? {
+            cep: address.cep,
+            logradouro: address.logradouro,
+            numero: address.numero,
+            complemento: address.complemento ?? '',
+            bairro: address.bairro,
+            cidade: address.cidade,
+            uf: address.uf,
+            referencia: address.referencia ?? '',
+          }
+        : emptyAddress(),
+    },
   })
 
   const updateMutation = useMutation({
@@ -49,7 +82,6 @@ export function ProfilePage() {
       updateUser(data)
       void queryClient.invalidateQueries({ queryKey: ['user', user?.id] })
       notify('Perfil atualizado')
-      reset({ name: data.name })
     },
     onError: (error) => notify(getErrorMessage(error), 'error'),
   })
@@ -68,8 +100,6 @@ export function ProfilePage() {
   if (query.isError) {
     return <ErrorState message={getErrorMessage(query.error)} onRetry={() => void query.refetch()} />
   }
-
-  const profile = query.data
 
   return (
     <Stack spacing={3} maxWidth={560}>
@@ -91,12 +121,8 @@ export function ProfilePage() {
                 />
               )}
             />
-            {profile?.address ? (
-              <Typography variant="body2" color="text.secondary">
-                {profile.address.logradouro}, {profile.address.numero} — {profile.address.bairro},{' '}
-                {profile.address.cidade}/{profile.address.uf}
-              </Typography>
-            ) : null}
+            <Typography variant="h6">Endereço</Typography>
+            <AddressFields control={control} setValue={setValue} prefix="address" />
             <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
               Salvar
             </Button>

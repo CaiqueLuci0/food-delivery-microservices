@@ -3,6 +3,7 @@ package food.delivery.restaurant_ms.infra.config;
 import food.delivery.restaurant_ms.core.application.ports.in.RestaurantCrudUseCaseInputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.CepLookupOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.GeocodingOutputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.ObjectStorageOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantCreatedEventOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantDeletedEventOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantRepositoryOutputPort;
@@ -21,7 +22,8 @@ public class RestaurantCrudUseCaseConfig {
             CepLookupOutputPort cepLookupOutputPort,
             GeocodingOutputPort geocodingOutputPort,
             RestaurantCreatedEventOutputPort restaurantCreatedEventOutputPort,
-            RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort
+            RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort,
+            ObjectStorageOutputPort objectStorageOutputPort
     ) {
         return new RestaurantCrudUseCase(
                 restaurantRepositoryOutputPort,
@@ -29,7 +31,8 @@ public class RestaurantCrudUseCaseConfig {
                 cepLookupOutputPort,
                 geocodingOutputPort,
                 restaurantCreatedEventOutputPort,
-                restaurantDeletedEventOutputPort
+                restaurantDeletedEventOutputPort,
+                objectStorageOutputPort
         );
     }
 }

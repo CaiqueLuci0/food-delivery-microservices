@@ -19,7 +19,7 @@ export function CreateRestaurantPage() {
   const { notify } = useSnackbar()
   const navigate = useNavigate()
 
-  const { control, handleSubmit } = useForm<FormValues>({
+  const { control, setValue, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(restaurantSchema),
     defaultValues: {
       name: '',
@@ -87,7 +87,7 @@ export function CreateRestaurantPage() {
               )}
             />
             <Typography variant="h6">Endereço</Typography>
-            <AddressFields control={control} prefix="address" />
+            <AddressFields control={control} setValue={setValue} prefix="address" />
             <Button type="submit" variant="contained" disabled={mutation.isPending}>
               {mutation.isPending ? 'Salvando…' : 'Criar'}
             </Button>

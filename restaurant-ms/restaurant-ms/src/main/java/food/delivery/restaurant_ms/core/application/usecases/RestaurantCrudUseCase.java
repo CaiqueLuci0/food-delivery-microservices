@@ -3,6 +3,7 @@ package food.delivery.restaurant_ms.core.application.usecases;
 import food.delivery.restaurant_ms.core.application.ports.in.RestaurantCrudUseCaseInputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.CepLookupOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.GeocodingOutputPort;
+import food.delivery.restaurant_ms.core.application.ports.out.ObjectStorageOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantCreatedEventOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantDeletedEventOutputPort;
 import food.delivery.restaurant_ms.core.application.ports.out.RestaurantRepositoryOutputPort;
@@ -16,13 +17,21 @@ import food.delivery.restaurant_ms.core.domain.exceptions.ConflictException;
 import food.delivery.restaurant_ms.core.domain.exceptions.ForbiddenException;
 import food.delivery.restaurant_ms.core.domain.exceptions.NotFoundException;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
 
     private static final double SEARCH_RADIUS_METERS = 3000d;
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif"
+    );
 
     private final RestaurantRepositoryOutputPort restaurantRepositoryOutputPort;
     private final UserReferenceRepositoryOutputPort userReferenceRepositoryOutputPort;
@@ -30,6 +39,7 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
     private final GeocodingOutputPort geocodingOutputPort;
     private final RestaurantCreatedEventOutputPort restaurantCreatedEventOutputPort;
     private final RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort;
+    private final ObjectStorageOutputPort objectStorageOutputPort;
 
     public RestaurantCrudUseCase(
             RestaurantRepositoryOutputPort restaurantRepositoryOutputPort,
@@ -37,7 +47,8 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
             CepLookupOutputPort cepLookupOutputPort,
             GeocodingOutputPort geocodingOutputPort,
             RestaurantCreatedEventOutputPort restaurantCreatedEventOutputPort,
-            RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort
+            RestaurantDeletedEventOutputPort restaurantDeletedEventOutputPort,
+            ObjectStorageOutputPort objectStorageOutputPort
     ) {
         this.restaurantRepositoryOutputPort = restaurantRepositoryOutputPort;
         this.userReferenceRepositoryOutputPort = userReferenceRepositoryOutputPort;
@@ -45,6 +56,7 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
         this.geocodingOutputPort = geocodingOutputPort;
         this.restaurantCreatedEventOutputPort = restaurantCreatedEventOutputPort;
         this.restaurantDeletedEventOutputPort = restaurantDeletedEventOutputPort;
+        this.objectStorageOutputPort = objectStorageOutputPort;
     }
 
     @Override
@@ -100,7 +112,12 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
     }
 
     @Override
-    public Restaurant update(UUID authenticatedUserId, UUID restaurantId, Restaurant restaurant, Address address) {
+    public Restaurant update(
+            UUID authenticatedUserId,
+            UUID restaurantId,
+            Restaurant restaurant,
+            Address address
+    ) {
         Restaurant existing = findById(restaurantId);
         assertOwner(authenticatedUserId, existing);
 
@@ -131,9 +148,45 @@ public class RestaurantCrudUseCase implements RestaurantCrudUseCaseInputPort {
     }
 
     @Override
+    public Restaurant uploadImage(
+            UUID authenticatedUserId,
+            UUID restaurantId,
+            InputStream body,
+            long contentLength,
+            String contentType
+    ) {
+        Restaurant existing = findById(restaurantId);
+        assertOwner(authenticatedUserId, existing);
+        if (body == null || contentLength <= 0) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+        String key = "restaurants/" + restaurantId + "/profile";
+        objectStorageOutputPort.put(key, body, contentLength, contentType.toLowerCase());
+        existing.setImageKey(key);
+        return restaurantRepositoryOutputPort.save(existing);
+    }
+
+    @Override
+    public Restaurant deleteImage(UUID authenticatedUserId, UUID restaurantId) {
+        Restaurant existing = findById(restaurantId);
+        assertOwner(authenticatedUserId, existing);
+        if (existing.getImageKey() != null) {
+            objectStorageOutputPort.delete(existing.getImageKey());
+            existing.setImageKey(null);
+        }
+        return restaurantRepositoryOutputPort.save(existing);
+    }
+
+    @Override
     public void delete(UUID authenticatedUserId, UUID restaurantId) {
         Restaurant existing = findById(restaurantId);
         assertOwner(authenticatedUserId, existing);
+        if (existing.getImageKey() != null) {
+            objectStorageOutputPort.delete(existing.getImageKey());
+        }
         UUID deletedId = existing.getId();
         restaurantRepositoryOutputPort.delete(existing);
         restaurantDeletedEventOutputPort.publish(deletedId);

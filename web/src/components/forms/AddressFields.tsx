@@ -1,15 +1,81 @@
-import { Stack, TextField } from '@mui/material'
-import type { Control, FieldPath, FieldValues } from 'react-hook-form'
-import { Controller } from 'react-hook-form'
-import { formatAddressNumber, formatCep, formatUf } from '@/utils/masks'
+import { CircularProgress, InputAdornment, Stack, TextField } from '@mui/material'
+import { useEffect, useRef, useState } from 'react'
+import type { Control, FieldPath, FieldValues, PathValue, UseFormSetValue } from 'react-hook-form'
+import { Controller, useWatch } from 'react-hook-form'
+import { lookupCep } from '@/services/viaCepService'
+import { cepDigits, formatAddressNumber, formatCep, formatUf } from '@/utils/masks'
 
 type AddressFieldsProps<T extends FieldValues> = {
   control: Control<T>
+  setValue: UseFormSetValue<T>
   prefix: FieldPath<T>
 }
 
-export function AddressFields<T extends FieldValues>({ control, prefix }: AddressFieldsProps<T>) {
+export function AddressFields<T extends FieldValues>({
+  control,
+  setValue,
+  prefix,
+}: AddressFieldsProps<T>) {
   const field = (name: string) => `${String(prefix)}.${name}` as FieldPath<T>
+  const cepValue = useWatch({ control, name: field('cep') })
+  const [lookingUp, setLookingUp] = useState(false)
+  const [cepError, setCepError] = useState<string | null>(null)
+  const lastLookupRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    const digits = cepDigits(String(cepValue ?? ''))
+    if (digits.length !== 8) {
+      setCepError(null)
+      lastLookupRef.current = null
+      return
+    }
+    if (lastLookupRef.current === digits) {
+      return
+    }
+
+    let cancelled = false
+    lastLookupRef.current = digits
+    setLookingUp(true)
+    setCepError(null)
+
+    void lookupCep(digits)
+      .then((address) => {
+        if (cancelled) return
+        if (!address) {
+          setCepError('CEP não encontrado')
+          return
+        }
+        setValue(field('logradouro'), address.logradouro as PathValue<T, FieldPath<T>>, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+        setValue(field('bairro'), address.bairro as PathValue<T, FieldPath<T>>, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+        setValue(field('cidade'), address.cidade as PathValue<T, FieldPath<T>>, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+        setValue(field('uf'), formatUf(address.uf) as PathValue<T, FieldPath<T>>, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCepError('Não foi possível consultar o CEP')
+          lastLookupRef.current = null
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLookingUp(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [cepValue, prefix, setValue])
 
   return (
     <Stack spacing={2}>
@@ -24,8 +90,15 @@ export function AddressFields<T extends FieldValues>({ control, prefix }: Addres
             label="CEP"
             placeholder="00000-000"
             inputProps={{ inputMode: 'numeric', maxLength: 9 }}
-            error={Boolean(fieldState.error)}
-            helperText={fieldState.error?.message}
+            error={Boolean(fieldState.error) || Boolean(cepError)}
+            helperText={fieldState.error?.message ?? cepError ?? undefined}
+            InputProps={{
+              endAdornment: lookingUp ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={18} />
+                </InputAdornment>
+              ) : undefined,
+            }}
             fullWidth
           />
         )}

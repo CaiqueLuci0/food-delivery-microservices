@@ -81,7 +81,6 @@ services:
     container_name: user-ms-rabbitmq
     ports:
       - "5672:5672"
-      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: usr
       RABBITMQ_DEFAULT_PASS: pwd
@@ -95,6 +94,24 @@ services:
       timeout: 10s
       retries: 12
       start_period: 50s
+
+  localstack:
+    image: localstack/localstack:3
+    container_name: food-delivery-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - ./localstack/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
 
   user-ms:
     build:
@@ -136,10 +153,18 @@ services:
       SPRING_RABBITMQ_USERNAME: usr
       SPRING_RABBITMQ_PASSWORD: pwd
       GEOAPIFY_API_KEY: d1f434e8f38e4092af7f87a16b65754d
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      APP_S3_ENDPOINT: http://localstack:4566
+      APP_S3_BUCKET: food-delivery
+      APP_S3_PUBLIC_BASE_URL: http://localhost:8080/s3
     depends_on:
       mysql:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      localstack:
         condition: service_healthy
 
   catalog-ms:
@@ -158,10 +183,18 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: usr
       SPRING_RABBITMQ_PASSWORD: pwd
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      APP_S3_ENDPOINT: http://localstack:4566
+      APP_S3_BUCKET: food-delivery
+      APP_S3_PUBLIC_BASE_URL: http://localhost:8080/s3
     depends_on:
       postgres-catalog:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      localstack:
         condition: service_healthy
 
   order-ms:
@@ -234,6 +267,7 @@ services:
       - catalog-ms
       - order-ms
       - payment-ms
+      - localstack
 
   seed:
     image: alpine:3.20
@@ -264,6 +298,8 @@ services:
       mysql:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      localstack:
         condition: service_healthy
       user-ms:
         condition: service_started

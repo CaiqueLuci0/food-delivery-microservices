@@ -8,6 +8,7 @@ import type { z } from 'zod'
 import { getErrorMessage } from '@/api/httpClient'
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog'
 import { AddressFields } from '@/components/forms/AddressFields'
+import { ImageUploadField } from '@/components/forms/ImageUploadField'
 import { PageLoader } from '@/components/feedback/States'
 import { useOwnerRestaurant } from '@/contexts/OwnerRestaurantContext'
 import { useSnackbar } from '@/contexts/SnackbarContext'
@@ -21,8 +22,9 @@ export function EditRestaurantPage() {
   const { notify } = useSnackbar()
   const navigate = useNavigate()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
-  const { control, handleSubmit } = useForm<FormValues>({
+  const { control, setValue, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(restaurantSchema),
     values: ownedRestaurant
       ? {
@@ -61,6 +63,34 @@ export function EditRestaurantPage() {
     onError: (error) => notify(getErrorMessage(error), 'error'),
   })
 
+  const handleImageSelect = async (file: File) => {
+    if (!ownedRestaurant) return
+    setUploading(true)
+    try {
+      await restaurantService.uploadImage(ownedRestaurant.id, file)
+      await refetch()
+      notify('Imagem atualizada')
+    } catch (error) {
+      notify(getErrorMessage(error), 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleImageClear = async () => {
+    if (!ownedRestaurant) return
+    setUploading(true)
+    try {
+      await restaurantService.removeImage(ownedRestaurant.id)
+      await refetch()
+      notify('Imagem removida')
+    } catch (error) {
+      notify(getErrorMessage(error), 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   if (isLoading || !ownedRestaurant) return <PageLoader />
 
   return (
@@ -76,6 +106,13 @@ export function EditRestaurantPage() {
             {updateMutation.isError ? (
               <Alert severity="error">{getErrorMessage(updateMutation.error)}</Alert>
             ) : null}
+            <ImageUploadField
+              label="Imagem de perfil"
+              imageUrl={ownedRestaurant.imageUrl}
+              uploading={uploading}
+              onSelect={(file) => void handleImageSelect(file)}
+              onClear={() => void handleImageClear()}
+            />
             <Controller
               name="name"
               control={control}
@@ -105,8 +142,8 @@ export function EditRestaurantPage() {
               )}
             />
             <Typography variant="h6">Endereço</Typography>
-            <AddressFields control={control} prefix="address" />
-            <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
+            <AddressFields control={control} setValue={setValue} prefix="address" />
+            <Button type="submit" variant="contained" disabled={updateMutation.isPending || uploading}>
               Salvar
             </Button>
           </Stack>

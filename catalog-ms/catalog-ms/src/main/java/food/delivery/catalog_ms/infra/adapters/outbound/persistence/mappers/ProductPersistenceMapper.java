@@ -26,6 +26,7 @@ public final class ProductPersistenceMapper {
         jpaProduct.setDescription(product.getDescription());
         jpaProduct.setOwnerId(product.getOwnerId());
         jpaProduct.setRestaurantId(product.getRestaurantId());
+        jpaProduct.setImageKey(product.getImageKey());
 
         List<JpaSpecification> jpaSpecifications = new ArrayList<>();
         if (product.getSpecifications() != null) {
@@ -43,6 +44,7 @@ public final class ProductPersistenceMapper {
         jpaProduct.setDescription(product.getDescription());
         jpaProduct.setOwnerId(product.getOwnerId());
         jpaProduct.setRestaurantId(product.getRestaurantId());
+        jpaProduct.setImageKey(product.getImageKey());
     }
 
     public static void replaceSpecifications(Product product, JpaProduct jpaProduct) {
@@ -71,6 +73,7 @@ public final class ProductPersistenceMapper {
         product.setDescription(jpaProduct.getDescription());
         product.setOwnerId(jpaProduct.getOwnerId());
         product.setRestaurantId(jpaProduct.getRestaurantId());
+        product.setImageKey(jpaProduct.getImageKey());
 
         List<Specification> specifications = new ArrayList<>();
         if (jpaProduct.getSpecifications() != null) {

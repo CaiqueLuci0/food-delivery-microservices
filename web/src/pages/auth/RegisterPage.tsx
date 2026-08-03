@@ -18,7 +18,7 @@ export function RegisterPage() {
   const { setSession } = useAuth()
   const { notify } = useSnackbar()
 
-  const { control, handleSubmit } = useForm<FormValues>({
+  const { control, setValue, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
@@ -108,7 +108,7 @@ export function RegisterPage() {
               )}
             />
             <Typography variant="h6">Endereço</Typography>
-            <AddressFields control={control} prefix="address" />
+            <AddressFields control={control} setValue={setValue} prefix="address" />
             <Button type="submit" variant="contained" size="large" disabled={mutation.isPending}>
               {mutation.isPending ? 'Salvando…' : 'Cadastrar'}
             </Button>

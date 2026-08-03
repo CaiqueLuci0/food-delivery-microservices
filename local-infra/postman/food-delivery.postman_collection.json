@@ -191,7 +191,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"João Silva Atualizado\"\n}"
+                  "raw": "{\n  \"name\": \"João Silva Atualizado\",\n  \"address\": {\n    \"cep\": \"01310-100\",\n    \"logradouro\": \"Avenida Paulista\",\n    \"numero\": \"1000\",\n    \"complemento\": \"Apto 12\",\n    \"bairro\": \"Bela Vista\",\n    \"cidade\": \"São Paulo\",\n    \"uf\": \"SP\",\n    \"referencia\": \"Próximo ao MASP\"\n  }\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/user-ms/users/{{userId}}",

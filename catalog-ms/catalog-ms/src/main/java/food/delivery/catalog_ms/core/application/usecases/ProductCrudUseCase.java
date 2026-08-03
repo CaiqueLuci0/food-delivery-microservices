@@ -1,6 +1,7 @@
 package food.delivery.catalog_ms.core.application.usecases;
 
 import food.delivery.catalog_ms.core.application.ports.in.ProductCrudUseCaseInputPort;
+import food.delivery.catalog_ms.core.application.ports.out.ObjectStorageOutputPort;
 import food.delivery.catalog_ms.core.application.ports.out.ProductRepositoryOutputPort;
 import food.delivery.catalog_ms.core.application.ports.out.RestaurantReferenceRepositoryOutputPort;
 import food.delivery.catalog_ms.core.domain.entities.Product;
@@ -12,21 +13,33 @@ import food.delivery.catalog_ms.core.domain.exceptions.ConflictException;
 import food.delivery.catalog_ms.core.domain.exceptions.ForbiddenException;
 import food.delivery.catalog_ms.core.domain.exceptions.NotFoundException;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class ProductCrudUseCase implements ProductCrudUseCaseInputPort {
 
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif"
+    );
+
     private final ProductRepositoryOutputPort productRepositoryOutputPort;
     private final RestaurantReferenceRepositoryOutputPort restaurantReferenceRepositoryOutputPort;
+    private final ObjectStorageOutputPort objectStorageOutputPort;
 
     public ProductCrudUseCase(
             ProductRepositoryOutputPort productRepositoryOutputPort,
-            RestaurantReferenceRepositoryOutputPort restaurantReferenceRepositoryOutputPort
+            RestaurantReferenceRepositoryOutputPort restaurantReferenceRepositoryOutputPort,
+            ObjectStorageOutputPort objectStorageOutputPort
     ) {
         this.productRepositoryOutputPort = productRepositoryOutputPort;
         this.restaurantReferenceRepositoryOutputPort = restaurantReferenceRepositoryOutputPort;
+        this.objectStorageOutputPort = objectStorageOutputPort;
     }
 
     @Override
@@ -90,9 +103,45 @@ public class ProductCrudUseCase implements ProductCrudUseCaseInputPort {
     }
 
     @Override
+    public Product uploadImage(
+            UUID authenticatedUserId,
+            UUID productId,
+            InputStream body,
+            long contentLength,
+            String contentType
+    ) {
+        Product existing = findById(productId);
+        assertOwner(authenticatedUserId, existing);
+        if (body == null || contentLength <= 0) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new ConflictException(ConstMessagesEnum.INVALID_REQUEST.getMessage());
+        }
+        String key = "products/" + productId + "/photo";
+        objectStorageOutputPort.put(key, body, contentLength, contentType.toLowerCase());
+        existing.setImageKey(key);
+        return productRepositoryOutputPort.save(existing, false);
+    }
+
+    @Override
+    public Product deleteImage(UUID authenticatedUserId, UUID productId) {
+        Product existing = findById(productId);
+        assertOwner(authenticatedUserId, existing);
+        if (existing.getImageKey() != null) {
+            objectStorageOutputPort.delete(existing.getImageKey());
+            existing.setImageKey(null);
+        }
+        return productRepositoryOutputPort.save(existing, false);
+    }
+
+    @Override
     public void delete(UUID authenticatedUserId, UUID productId) {
         Product existing = findById(productId);
         assertOwner(authenticatedUserId, existing);
+        if (existing.getImageKey() != null) {
+            objectStorageOutputPort.delete(existing.getImageKey());
+        }
         productRepositoryOutputPort.delete(existing);
     }
 

@@ -47,7 +47,9 @@ Ou manualmente no host (com a stack no ar):
 ./seed/seed.sh
 ```
 
-Variáveis úteis: `BASE_URL`, `SEED_PASSWORD`, `MAX_WAIT_SEC`, `RETRY_SLEEP_SEC`.
+Variáveis úteis: `BASE_URL`, `SEED_PASSWORD`, `MAX_WAIT_SEC`, `RETRY_SLEEP_SEC`, `SEED_IMAGES_DIR`.
+
+Imagens em [`seed/images`](./images): `profile_pics/` (perfil do restaurante) e `products/` (foto de cada produto). O seed envia multipart (`curl -F file=@...`) para `PUT .../image` no restaurant-ms / catalog-ms.
 
 Login de exemplo:
 

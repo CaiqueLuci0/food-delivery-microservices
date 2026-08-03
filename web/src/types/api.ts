@@ -49,6 +49,7 @@ export type UserCreateRequest = {
 
 export type UserUpdateRequest = {
   name: string
+  address: AddressRequest
 }
 
 export type Restaurant = {
@@ -56,6 +57,8 @@ export type Restaurant = {
   name: string
   description: string
   ownerId: string
+  imageKey?: string | null
+  imageUrl?: string | null
   address: AddressResponse
 }
 
@@ -98,6 +101,8 @@ export type Product = {
   description?: string | null
   ownerId: string
   restaurantId: string
+  imageKey?: string | null
+  imageUrl?: string | null
   specifications: Specification[]
 }
 

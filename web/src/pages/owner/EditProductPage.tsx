@@ -8,6 +8,7 @@ import type { z } from 'zod'
 import { getErrorMessage } from '@/api/httpClient'
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog'
 import { ErrorState, PageLoader } from '@/components/feedback/States'
+import { ImageUploadField } from '@/components/forms/ImageUploadField'
 import { ProductSpecificationsFields } from '@/components/owner/ProductSpecificationsFields'
 import { useOwnerRestaurant } from '@/contexts/OwnerRestaurantContext'
 import { useSnackbar } from '@/contexts/SnackbarContext'
@@ -41,6 +42,7 @@ export function EditProductPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const query = useQuery({
     queryKey: ['product', id],
@@ -79,14 +81,49 @@ export function EditProductPage() {
     onError: (error) => notify(getErrorMessage(error), 'error'),
   })
 
+  const handleImageSelect = async (file: File) => {
+    setUploading(true)
+    try {
+      await productService.uploadImage(id, file)
+      await queryClient.invalidateQueries({ queryKey: ['product', id] })
+      await queryClient.invalidateQueries({ queryKey: ['owner-products', ownedRestaurant?.id] })
+      notify('Imagem atualizada')
+    } catch (error) {
+      notify(getErrorMessage(error), 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleImageClear = async () => {
+    setUploading(true)
+    try {
+      await productService.removeImage(id)
+      await queryClient.invalidateQueries({ queryKey: ['product', id] })
+      await queryClient.invalidateQueries({ queryKey: ['owner-products', ownedRestaurant?.id] })
+      notify('Imagem removida')
+    } catch (error) {
+      notify(getErrorMessage(error), 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   if (query.isLoading) return <PageLoader />
   if (query.isError) {
     return <ErrorState message={getErrorMessage(query.error)} onRetry={() => void query.refetch()} />
   }
 
+  const product = query.data!
+
   return (
     <Stack spacing={3} maxWidth={720}>
-      <Typography variant="h4">Editar produto</Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
+        <Typography variant="h4">Editar produto</Typography>
+        <Button variant="text" onClick={() => navigate('/restaurant/products')}>
+          Voltar
+        </Button>
+      </Stack>
       <Card>
         <CardContent>
           <Stack
@@ -94,6 +131,13 @@ export function EditProductPage() {
             component="form"
             onSubmit={handleSubmit((v) => updateMutation.mutate(v))}
           >
+            <ImageUploadField
+              label="Foto do produto"
+              imageUrl={product.imageUrl}
+              uploading={uploading}
+              onSelect={(file) => void handleImageSelect(file)}
+              onClear={() => void handleImageClear()}
+            />
             <Controller
               name="name"
               control={control}
@@ -129,7 +173,7 @@ export function EditProductPage() {
               )}
             />
             <ProductSpecificationsFields control={control} />
-            <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
+            <Button type="submit" variant="contained" disabled={updateMutation.isPending || uploading}>
               Salvar
             </Button>
           </Stack>

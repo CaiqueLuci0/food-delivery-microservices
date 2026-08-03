@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-add-restaurant-image-key
+      author: food-delivery
+      changes:
+        - addColumn:
+            tableName: restaurant
+            columns:
+              - column:
+                  name: image_key
+                  type: varchar(512)

@@ -20,6 +20,7 @@ public final class ProductResponseMapper {
         response.setDescription(product.getDescription());
         response.setOwnerId(product.getOwnerId());
         response.setRestaurantId(product.getRestaurantId());
+        response.setImageKey(product.getImageKey());
         response.setSpecifications(toSpecifications(product.getSpecifications()));
         return response;
     }

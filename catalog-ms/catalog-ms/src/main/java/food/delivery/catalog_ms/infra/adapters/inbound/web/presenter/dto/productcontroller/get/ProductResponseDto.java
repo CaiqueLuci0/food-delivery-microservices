@@ -12,6 +12,8 @@ public class ProductResponseDto {
     private String description;
     private UUID ownerId;
     private UUID restaurantId;
+    private String imageKey;
+    private String imageUrl;
     private List<SpecificationResponseDto> specifications = new ArrayList<>();
 
     public UUID getId() {
@@ -60,6 +62,22 @@ public class ProductResponseDto {
 
     public void setRestaurantId(UUID restaurantId) {
         this.restaurantId = restaurantId;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<SpecificationResponseDto> getSpecifications() {

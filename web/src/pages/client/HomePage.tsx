@@ -9,6 +9,7 @@ import {
   InputAdornment,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
@@ -73,12 +74,14 @@ export function HomePage() {
           ),
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton
-                aria-label="Usar localização do meu endereço cadastrado"
-                onClick={requestLocation}
-              >
-                <MyLocationIcon />
-              </IconButton>
+              <Tooltip title="Buscar por restaurantes próximos de você">
+                <IconButton
+                  aria-label="Buscar por restaurantes próximos de você"
+                  onClick={requestLocation}
+                >
+                  <MyLocationIcon />
+                </IconButton>
+              </Tooltip>
             </InputAdornment>
           ),
         }}
@@ -102,7 +105,12 @@ export function HomePage() {
                 <Box
                   sx={{
                     height: 140,
-                    background: 'linear-gradient(135deg, #FFE8EA 0%, #FFD0D4 50%, #F7F7F5 100%)',
+                    background: restaurant.imageUrl
+                      ? undefined
+                      : 'linear-gradient(135deg, #FFE8EA 0%, #FFD0D4 50%, #F7F7F5 100%)',
+                    backgroundImage: restaurant.imageUrl ? `url(${restaurant.imageUrl})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                   }}
                 />
                 <CardContent>

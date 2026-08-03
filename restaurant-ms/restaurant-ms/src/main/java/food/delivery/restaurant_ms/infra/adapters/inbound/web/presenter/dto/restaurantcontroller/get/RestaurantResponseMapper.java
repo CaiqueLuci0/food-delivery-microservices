@@ -19,6 +19,7 @@ public final class RestaurantResponseMapper {
         dto.setName(restaurant.getName());
         dto.setDescription(restaurant.getDescription());
         dto.setOwnerId(restaurant.getOwnerId());
+        dto.setImageKey(restaurant.getImageKey());
         dto.setAddress(toAddressResponse(restaurant.getAddress()));
         return dto;
     }

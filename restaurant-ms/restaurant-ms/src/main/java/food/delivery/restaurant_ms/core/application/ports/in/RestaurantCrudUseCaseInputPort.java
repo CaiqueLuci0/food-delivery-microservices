@@ -3,6 +3,7 @@ package food.delivery.restaurant_ms.core.application.ports.in;
 import food.delivery.restaurant_ms.core.domain.entities.Address;
 import food.delivery.restaurant_ms.core.domain.entities.Restaurant;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +16,22 @@ public interface RestaurantCrudUseCaseInputPort {
 
     Restaurant create(UUID authenticatedUserId, Restaurant restaurant, Address address);
 
-    Restaurant update(UUID authenticatedUserId, UUID restaurantId, Restaurant restaurant, Address address);
+    Restaurant update(
+            UUID authenticatedUserId,
+            UUID restaurantId,
+            Restaurant restaurant,
+            Address address
+    );
+
+    Restaurant uploadImage(
+            UUID authenticatedUserId,
+            UUID restaurantId,
+            InputStream body,
+            long contentLength,
+            String contentType
+    );
+
+    Restaurant deleteImage(UUID authenticatedUserId, UUID restaurantId);
 
     void delete(UUID authenticatedUserId, UUID restaurantId);
 }

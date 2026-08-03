@@ -49,6 +49,18 @@ export function RestaurantDetailPage() {
 
   return (
     <Stack spacing={3}>
+      <Box
+        sx={{
+          height: 180,
+          borderRadius: 1,
+          background: restaurant.imageUrl
+            ? undefined
+            : 'linear-gradient(135deg, #FFE8EA 0%, #FFD0D4 50%, #F7F7F5 100%)',
+          backgroundImage: restaurant.imageUrl ? `url(${restaurant.imageUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
       <Box>
         <Typography variant="h3">{restaurant.name}</Typography>
         <Typography color="text.secondary" mt={1}>
@@ -82,17 +94,32 @@ export function RestaurantDetailPage() {
         ? productsQuery.data.map((product) => (
             <Card key={product.id}>
               <CardActionArea component={RouterLink} to={`/products/${product.id}`}>
-                <CardContent>
-                  <Stack direction="row" justifyContent="space-between" gap={2}>
-                    <Box>
-                      <Typography variant="h6">{product.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {product.description}
-                      </Typography>
-                    </Box>
-                    <Typography fontWeight={700}>{formatCurrency(product.price)}</Typography>
-                  </Stack>
-                </CardContent>
+                <Stack direction={{ xs: 'column', sm: 'row' }}>
+                  <Box
+                    sx={{
+                      width: { sm: 120 },
+                      minHeight: 100,
+                      flexShrink: 0,
+                      background: product.imageUrl
+                        ? undefined
+                        : 'linear-gradient(135deg, #FFE8EA 0%, #FFD0D4 50%, #F7F7F5 100%)',
+                      backgroundImage: product.imageUrl ? `url(${product.imageUrl})` : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                  <CardContent sx={{ flex: 1 }}>
+                    <Stack direction="row" justifyContent="space-between" gap={2}>
+                      <Box>
+                        <Typography variant="h6">{product.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {product.description}
+                        </Typography>
+                      </Box>
+                      <Typography fontWeight={700}>{formatCurrency(product.price)}</Typography>
+                    </Stack>
+                  </CardContent>
+                </Stack>
               </CardActionArea>
             </Card>
           ))

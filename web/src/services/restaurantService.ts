@@ -27,4 +27,17 @@ export const restaurantService = {
   remove: async (id: string): Promise<void> => {
     await httpClient.delete(`/restaurant-ms/restaurants/${id}`)
   },
+  uploadImage: async (id: string, file: File): Promise<Restaurant> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await httpClient.put<Restaurant>(
+      `/restaurant-ms/restaurants/${id}/image`,
+      formData,
+    )
+    return data
+  },
+  removeImage: async (id: string): Promise<Restaurant> => {
+    const { data } = await httpClient.delete<Restaurant>(`/restaurant-ms/restaurants/${id}/image`)
+    return data
+  },
 }

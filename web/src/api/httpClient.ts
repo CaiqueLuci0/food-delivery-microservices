@@ -24,6 +24,10 @@ httpClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // Deixa o browser definir boundary em uploads multipart
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    config.headers.set('Content-Type', false)
+  }
   return config
 })
 

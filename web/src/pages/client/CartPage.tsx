@@ -31,7 +31,15 @@ export function CartPage() {
 
   return (
     <Stack spacing={3} maxWidth={720}>
-      <Typography variant="h4">Carrinho</Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
+        <Typography variant="h4">Carrinho</Typography>
+        <Button
+          variant="text"
+          onClick={() => navigate(restaurantId ? `/restaurants/${restaurantId}` : '/')}
+        >
+          Voltar
+        </Button>
+      </Stack>
       <Typography color="text.secondary">{items[0]?.restaurantName}</Typography>
       {items.map((item) => (
         <Card key={item.key}>

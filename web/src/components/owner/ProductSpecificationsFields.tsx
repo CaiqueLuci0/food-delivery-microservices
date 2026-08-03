@@ -155,7 +155,13 @@ export function ProductSpecificationsFields({ control }: ProductSpecificationsFi
       <Box>
         <Button
           variant="outlined"
-          onClick={() => append({ name: '', description: '', specOptions: [] })}
+          onClick={() =>
+            append({
+              name: '',
+              description: '',
+              specOptions: [{ name: '', description: '', extraPrice: 0 }],
+            })
+          }
         >
           Adicionar especificação
         </Button>

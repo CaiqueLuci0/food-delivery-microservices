@@ -21,6 +21,9 @@ public class JpaRestaurant {
     @JdbcTypeCode(SqlTypes.CHAR)
     private UUID ownerId;
 
+    @Column(name = "image_key", length = 512)
+    private String imageKey;
+
     @OneToOne(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private JpaAddress address;
 
@@ -57,6 +60,14 @@ public class JpaRestaurant {
 
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 
     public JpaAddress getAddress() {

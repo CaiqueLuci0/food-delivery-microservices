@@ -46,7 +46,8 @@ public class UserFacade {
         User updated = userCrudUseCase.update(
                 AuthenticatedUser.requireId(),
                 id,
-                UserUpdateMapper.toUser(request)
+                UserUpdateMapper.toUser(request),
+                UserUpdateMapper.toAddress(request)
         );
         return UserResponseMapper.toResponse(updated);
     }

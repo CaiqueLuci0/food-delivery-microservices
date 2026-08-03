@@ -23,4 +23,17 @@ export const productService = {
   remove: async (id: string): Promise<void> => {
     await httpClient.delete(`/catalog-ms/products/${id}`)
   },
+  uploadImage: async (id: string, file: File): Promise<Product> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await httpClient.put<Product>(
+      `/catalog-ms/products/${id}/image`,
+      formData,
+    )
+    return data
+  },
+  removeImage: async (id: string): Promise<Product> => {
+    const { data } = await httpClient.delete<Product>(`/catalog-ms/products/${id}/image`)
+    return data
+  },
 }

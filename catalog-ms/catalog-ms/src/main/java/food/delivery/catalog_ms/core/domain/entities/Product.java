@@ -12,6 +12,7 @@ public class Product {
     private String description;
     private UUID ownerId;
     private UUID restaurantId;
+    private String imageKey;
     private List<Specification> specifications = new ArrayList<>();
 
     public Product() {
@@ -63,6 +64,14 @@ public class Product {
 
     public void setRestaurantId(UUID restaurantId) {
         this.restaurantId = restaurantId;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 
     public List<Specification> getSpecifications() {

@@ -34,6 +34,9 @@ public class JpaProduct {
     @Column(name = "restaurant_id", nullable = false)
     private UUID restaurantId;
 
+    @Column(name = "image_key", length = 512)
+    private String imageKey;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Fetch(FetchMode.SUBSELECT)
     private List<JpaSpecification> specifications = new ArrayList<>();
@@ -91,6 +94,14 @@ public class JpaProduct {
 
     public void setRestaurantId(UUID restaurantId) {
         this.restaurantId = restaurantId;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 
     public List<JpaSpecification> getSpecifications() {

@@ -5,6 +5,8 @@ BASE_URL="${BASE_URL:-http://localhost:8080}"
 PASSWORD="${SEED_PASSWORD:-senha123}"
 MAX_WAIT_SEC="${MAX_WAIT_SEC:-180}"
 RETRY_SLEEP_SEC="${RETRY_SLEEP_SEC:-2}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+IMAGES_DIR="${SEED_IMAGES_DIR:-${SCRIPT_DIR}/images}"
 
 log() { printf '[seed] %s\n' "$*" >&2; }
 die() { printf '[seed] ERROR: %s\n' "$*" >&2; exit 1; }
@@ -15,6 +17,16 @@ need_cmd() {
 
 need_cmd curl
 need_cmd jq
+
+mime_for() {
+  case "${1##*.}" in
+    jpg|jpeg|JPG|JPEG) printf 'image/jpeg' ;;
+    png|PNG) printf 'image/png' ;;
+    webp|WEBP) printf 'image/webp' ;;
+    gif|GIF) printf 'image/gif' ;;
+    *) printf 'image/jpeg' ;;
+  esac
+}
 
 http_code() {
   local method="$1" url="$2" data="${3:-}" auth="${4:-}"
@@ -137,6 +149,26 @@ create_restaurant() {
   die "falha ao criar restaurante $name (HTTP $code): $(cat /tmp/seed-response.json)"
 }
 
+upload_image() {
+  local endpoint="$1" token="$2" file="$3"
+  [[ -f "$file" ]] || die "imagem não encontrada: $file"
+  local content_type code
+  content_type=$(mime_for "$file")
+  code=$(curl -sS -o /tmp/seed-response.json -w '%{http_code}' -X PUT "$endpoint" \
+    -H "Authorization: Bearer ${token}" \
+    -F "file=@${file};type=${content_type}")
+  [[ "$code" == "200" ]] || die "falha no upload de imagem (HTTP $code): $(cat /tmp/seed-response.json)"
+}
+
+attach_restaurant_image() {
+  local token="$1" restaurant_id="$2" file="$3"
+  upload_image \
+    "${BASE_URL}/restaurant-ms/restaurants/${restaurant_id}/image" \
+    "$token" \
+    "$file"
+  log "  Imagem de perfil: $(basename "$file")"
+}
+
 create_product_with_retry() {
   local token="$1" name="$2" price="$3" description="$4"
   local body
@@ -166,6 +198,7 @@ create_product_with_retry() {
     code=$(http_code POST "${BASE_URL}/catalog-ms/products" "$body" "$token")
     if [[ "$code" == "201" ]]; then
       log "  Produto criado: $name"
+      jq -r '.id' /tmp/seed-response.json
       return 0
     fi
     # catalog ainda sem restaurant_reference (mensagem assíncrona)
@@ -179,42 +212,71 @@ create_product_with_retry() {
   die "timeout aguardando restaurant_reference no catalog para criar $name"
 }
 
+attach_product_image() {
+  local token="$1" product_id="$2" file="$3"
+  upload_image \
+    "${BASE_URL}/catalog-ms/products/${product_id}/image" \
+    "$token" \
+    "$file"
+  log "    Foto: $(basename "$file")"
+}
+
+seed_restaurant_with_products() {
+  local token="$1" rest_id="$2" profile_image="$3"
+  shift 3
+  # remaining args: pairs of "Product Name|price|description|image_relative_path"
+  attach_restaurant_image "$token" "$rest_id" "${IMAGES_DIR}/${profile_image}"
+
+  local entry name price description image_rel product_id
+  for entry in "$@"; do
+    IFS='|' read -r name price description image_rel <<<"$entry"
+    product_id=$(create_product_with_retry "$token" "$name" "$price" "$description")
+    attach_product_image "$token" "$product_id" "${IMAGES_DIR}/${image_rel}"
+  done
+}
+
+[[ -d "$IMAGES_DIR" ]] || die "pasta de imagens não encontrada: $IMAGES_DIR"
+log "Usando imagens em ${IMAGES_DIR}"
+
 wait_gateway
 
-log "Criando base: 3 restaurantes x 5 produtos"
+log "Criando base: 3 restaurantes x 5 produtos (com imagens)"
 
 # --- Owner 1 / Pizzaria ---
 create_user "Ana Pizza" "ana.pizza@seed.local" "01001000" "Praça da Sé" "100" "Sé" >/dev/null
 TOKEN=$(login "ana.pizza@seed.local")
 REST_ID=$(create_restaurant "$TOKEN" "Pizzaria Centro Seed" "Pizzas artesanais" "01001000" "Praça da Sé" "100" "Sé")
 log "Restaurante 1 id=$REST_ID"
-create_product_with_retry "$TOKEN" "Pizza Margherita" 42.9 "Mussarela e manjericão"
-create_product_with_retry "$TOKEN" "Pizza Calabresa" 45.9 "Calabresa e cebola"
-create_product_with_retry "$TOKEN" "Pizza Quatro Queijos" 49.9 "Mistura de queijos"
-create_product_with_retry "$TOKEN" "Pizza Portuguesa" 47.5 "Presunto, ovo e cebola"
-create_product_with_retry "$TOKEN" "Pizza Frango Catupiry" 48.0 "Frango e catupiry"
+seed_restaurant_with_products "$TOKEN" "$REST_ID" "profile_pics/pizza.jpg" \
+  "Pizza Margherita|42.9|Mussarela e manjericão|products/pizza2.jpg" \
+  "Pizza Calabresa|45.9|Calabresa e cebola|products/pizza3.jpg" \
+  "Pizza Quatro Queijos|49.9|Mistura de queijos|products/pizzaCatupiry.jpg" \
+  "Pizza Portuguesa|47.5|Presunto, ovo e cebola|products/pizza2.jpg" \
+  "Pizza Frango Catupiry|48.0|Frango e catupiry|products/pizzaCatupiry.jpg"
 
 # --- Owner 2 / Burger ---
 create_user "Bruno Burger" "bruno.burger@seed.local" "01310100" "Avenida Paulista" "1500" "Bela Vista" >/dev/null
 TOKEN=$(login "bruno.burger@seed.local")
 REST_ID=$(create_restaurant "$TOKEN" "Burger House Seed" "Hambúrgueres smash" "01310100" "Avenida Paulista" "1500" "Bela Vista")
 log "Restaurante 2 id=$REST_ID"
-create_product_with_retry "$TOKEN" "Classic Burger" 32.0 "Blend 160g, queijo e salada"
-create_product_with_retry "$TOKEN" "Bacon Burger" 36.5 "Blend 160g e bacon"
-create_product_with_retry "$TOKEN" "Double Smash" 39.9 "Dois blends smash"
-create_product_with_retry "$TOKEN" "Chicken Burger" 34.0 "Frango empanado"
-create_product_with_retry "$TOKEN" "Veggie Burger" 33.5 "Hambúrguer de grão-de-bico"
+seed_restaurant_with_products "$TOKEN" "$REST_ID" "profile_pics/burger.jpg" \
+  "Classic Burger|32.0|Blend 160g, queijo e salada|products/hamburguer1.jpg" \
+  "Bacon Burger|36.5|Blend 160g e bacon|products/hamburger2.jpg" \
+  "Double Smash|39.9|Dois blends smash|products/hamburger3.jpg" \
+  "Chicken Burger|34.0|Frango empanado|products/hamburguer4.jpg" \
+  "Veggie Burger|33.5|Hambúrguer de grão-de-bico|products/hamburger2.jpg"
 
 # --- Owner 3 / Sushi ---
 create_user "Carla Sushi" "carla.sushi@seed.local" "04038001" "Rua Domingos de Morais" "2564" "Vila Mariana" >/dev/null
 TOKEN=$(login "carla.sushi@seed.local")
 REST_ID=$(create_restaurant "$TOKEN" "Sushi Bar Seed" "Comida japonesa" "04038001" "Rua Domingos de Morais" "2564" "Vila Mariana")
 log "Restaurante 3 id=$REST_ID"
-create_product_with_retry "$TOKEN" "Combo Salmão" 59.9 "8 peças de salmão"
-create_product_with_retry "$TOKEN" "Hot Roll" 28.0 "8 unidades"
-create_product_with_retry "$TOKEN" "Temaki Salmão" 24.5 "Temaki completo"
-create_product_with_retry "$TOKEN" "Yakissoba" 35.0 "Macarrão oriental"
-create_product_with_retry "$TOKEN" "Missoshiru" 12.0 "Sopa de missô"
+seed_restaurant_with_products "$TOKEN" "$REST_ID" "profile_pics/sushi.jpg" \
+  "Combo Salmão|59.9|8 peças de salmão|products/sushi.jpg" \
+  "Hot Roll|28.0|8 unidades|products/hotroll.jpg" \
+  "Temaki Salmão|24.5|Temaki completo|products/sushi.jpg" \
+  "Yakissoba|35.0|Macarrão oriental|products/hotroll.jpg" \
+  "Missoshiru|12.0|Sopa de missô|products/sushi.jpg"
 
 # --- Cliente de teste (sem restaurante) ---
 create_user "Diego Cliente" "diego.cliente@seed.local" "01414001" "Rua Augusta" "2690" "Jardins" >/dev/null

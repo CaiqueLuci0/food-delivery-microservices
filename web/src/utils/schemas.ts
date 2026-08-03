@@ -43,7 +43,7 @@ export const specOptionSchema = z.object({
 export const specificationSchema = z.object({
   name: z.string().min(1, 'Nome da especificação obrigatório'),
   description: z.string().optional().nullable(),
-  specOptions: z.array(specOptionSchema),
+  specOptions: z.array(specOptionSchema).min(1, 'Adicione ao menos uma opção'),
 })
 
 export const productSchema = z.object({

@@ -6,6 +6,7 @@ import food.delivery.restaurant_ms.infra.adapters.inbound.web.presenter.dto.rest
 import food.delivery.restaurant_ms.infra.adapters.inbound.web.presenter.dto.restaurantcontroller.update.RestaurantUpdateRequestDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -56,6 +59,19 @@ public class RestaurantController {
             @Valid @RequestBody RestaurantUpdateRequestDto request
     ) {
         return ResponseEntity.ok(restaurantFacade.update(id, request));
+    }
+
+    @PutMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<RestaurantResponseDto> uploadImage(
+            @PathVariable UUID id,
+            @RequestPart("file") MultipartFile file
+    ) {
+        return ResponseEntity.ok(restaurantFacade.uploadImage(id, file));
+    }
+
+    @DeleteMapping("/{id}/image")
+    public ResponseEntity<RestaurantResponseDto> deleteImage(@PathVariable UUID id) {
+        return ResponseEntity.ok(restaurantFacade.deleteImage(id));
     }
 
     @DeleteMapping("/{id}")
