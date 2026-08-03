@@ -1,0 +1,15 @@
+# Normalize text files to LF so scripts work in Linux containers (Docker) on Windows hosts too.
+* text=auto eol=lf
+
+*.sh text eol=lf
+**/mvnw text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.jar binary
+*.jar.keep binary
