@@ -1,6 +1,5 @@
 # food-delivery-microservices
 
-Desafio para uma vaga em uma empresa de delivery.
 <img width="975" height="500" alt="image" src="https://github.com/user-attachments/assets/6f911f65-adbb-475b-8a3f-5be803d99e38" />
 
 
