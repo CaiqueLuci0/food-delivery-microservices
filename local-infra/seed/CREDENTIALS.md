@@ -33,9 +33,9 @@ Acompanhar o seed:
 docker compose logs -f seed
 ```
 
-O container `food-delivery-seed` encerra após o script (`restart: "no"`). Em reexecuções, usuários/restaurantes já existentes são tratados (login / 409).
+O container `food-delivery-seed` encerra após o script (`restart: "no"`). Ao terminar com sucesso, grava `/tmp/seed.done` no filesystem do container; um novo `compose up` no **mesmo** container detecta o arquivo e pula o seed. `compose down` remove o container — na próxima subida o seed roda de novo.
 
-Rodar o seed de novo sem derrubar a stack:
+Rodar o seed de novo sem derrubar a stack (container novo):
 
 ```bash
 docker compose run --rm seed

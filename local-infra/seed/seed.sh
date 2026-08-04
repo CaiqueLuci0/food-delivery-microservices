@@ -18,6 +18,12 @@ need_cmd() {
 need_cmd curl
 need_cmd jq
 
+SEED_DONE_MARKER="${SEED_DONE_MARKER:-/tmp/seed.done}"
+if [[ -f "$SEED_DONE_MARKER" ]]; then
+  log "Seed já executado neste container ($SEED_DONE_MARKER) — pulando"
+  exit 0
+fi
+
 mime_for() {
   case "${1##*.}" in
     jpg|jpeg|JPG|JPEG) printf 'image/jpeg' ;;
@@ -281,4 +287,6 @@ seed_restaurant_with_products "$TOKEN" "$REST_ID" "profile_pics/sushi.jpg" \
 # --- Cliente de teste (sem restaurante) ---
 create_user "Diego Cliente" "diego.cliente@seed.local" "01414001" "Rua Augusta" "2690" "Jardins" >/dev/null
 
+touch "$SEED_DONE_MARKER"
+log "--------------------------------"
 log "Seed concluído. Credenciais em local-infra/seed/CREDENTIALS.md"
