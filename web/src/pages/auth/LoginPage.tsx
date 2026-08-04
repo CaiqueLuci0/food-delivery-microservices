@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import type { z } from 'zod'
 import { getErrorMessage } from '@/api/httpClient'
+import { PasswordTextField } from '@/components/forms/PasswordTextField'
 import { useAuth } from '@/contexts/AuthContext'
 import { authService } from '@/services/userService'
 import { loginSchema } from '@/utils/schemas'
@@ -65,10 +66,9 @@ export function LoginPage() {
               name="password"
               control={control}
               render={({ field }) => (
-                <TextField
+                <PasswordTextField
                   {...field}
                   label="Senha"
-                  type="password"
                   autoComplete="current-password"
                   error={Boolean(errors.password)}
                   helperText={errors.password?.message}

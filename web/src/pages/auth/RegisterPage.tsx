@@ -6,6 +6,7 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import type { z } from 'zod'
 import { getErrorMessage } from '@/api/httpClient'
 import { AddressFields } from '@/components/forms/AddressFields'
+import { PasswordTextField } from '@/components/forms/PasswordTextField'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSnackbar } from '@/contexts/SnackbarContext'
 import { authService, userService } from '@/services/userService'
@@ -96,10 +97,9 @@ export function RegisterPage() {
               name="password"
               control={control}
               render={({ field, fieldState }) => (
-                <TextField
+                <PasswordTextField
                   {...field}
                   label="Senha"
-                  type="password"
                   autoComplete="new-password"
                   error={Boolean(fieldState.error)}
                   helperText={fieldState.error?.message}
